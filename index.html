@@ -1,0 +1,2006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PL/SQL Master Guide - Full Marks</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #141933;
+            --bg-tertiary: #1e2540;
+            --accent: #00d4ff;
+            --accent-glow: rgba(0, 212, 255, 0.2);
+            --text-primary: #e8edf4;
+            --text-secondary: #9ca3af;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        code, pre {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-tertiary);
+            padding: 0.2em 0.5em;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            padding: 1.5em;
+            overflow-x: auto;
+            margin: 1em 0;
+            border-left: 3px solid var(--accent);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #00ffc8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        nav {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .nav-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .nav-btn:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .nav-btn.active {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-color: var(--accent);
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 24px var(--accent-glow);
+        }
+
+        h2 {
+            color: var(--accent);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        h3 {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+            font-weight: 600;
+        }
+
+        h4 {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin: 1.5rem 0 0.75rem;
+            font-weight: 600;
+        }
+
+        .unit-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .unit-card {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .unit-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        .unit-card.selected {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .unit-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .unit-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .question-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option {
+            padding: 1rem 1.5rem;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .option.selected {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .option.correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .option.incorrect {
+            border-color: var(--error);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .flashcard {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            margin: 2rem auto;
+            max-width: 600px;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .flashcard:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+
+        .flashcard.flipped .front {
+            display: none;
+        }
+
+        .flashcard.flipped .back {
+            display: block;
+        }
+
+        .flashcard .back {
+            display: none;
+        }
+
+        .flashcard-label {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .flashcard-text {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            background: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #00b8e6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            transition: width 0.5s ease;
+        }
+
+        .score-display {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .feedback {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid;
+        }
+
+        .feedback.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .feedback.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        ul {
+            list-style-position: inside;
+            margin: 1rem 0 1rem 1rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+            color: var(--text-secondary);
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem 0.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .flashcard {
+                min-height: 250px;
+                padding: 2rem 1rem;
+            }
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .easy { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .hard { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>PL/SQL Master Guide</h1>
+        <div class="subtitle">Your Complete Study System for Full Marks</div>
+        <nav>
+            <button class="nav-btn active" onclick="showSection('guide')">Study Guide</button>
+            <button class="nav-btn" onclick="showSection('quiz')">Practice Quiz</button>
+            <button class="nav-btn" onclick="showSection('flashcards')">Flashcards</button>
+            <button class="nav-btn" onclick="showSection('exercises')">Coding Exercises</button>
+            <button class="nav-btn" onclick="showSection('progress')">Progress</button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- STUDY GUIDE SECTION -->
+        <section id="guide" class="section active">
+            <div class="card">
+                <h2>📚 Complete Study Guide</h2>
+                
+                <h3>Unit 10: PL/SQL Functions</h3>
+                <h4>Key Concepts</h4>
+                <p>A <strong>function</strong> is a PL/SQL module that <strong>returns a value</strong>. Functions are reusable and compiled once, stored in your schema.</p>
+                
+                <h4>Function Structure</h4>
+                <pre>FUNCTION [schema.]name [(parameters)]
+RETURN return_datatype
+IS|AS
+  [declarations]
+BEGIN
+  -- PL/SQL statements
+  RETURN value;
+[EXCEPTION
+  exception_handlers]
+END [name];</pre>
+
+                <h4>Important Points</h4>
+                <ul>
+                    <li><strong>Must have a RETURN statement</strong> in the executable section</li>
+                    <li>Parameters are <strong>IN mode only</strong> (read-only)</li>
+                    <li>Can be called from SELECT statements</li>
+                    <li><strong>Formal parameters</strong> = placeholders in header</li>
+                    <li><strong>Actual parameters</strong> = values passed during call</li>
+                    <li>Drop with: <code>DROP FUNCTION function_name;</code></li>
+                </ul>
+
+                <h4>Example: Calculate Age Function</h4>
+                <pre>CREATE OR REPLACE FUNCTION Calculate_Age (Birth_Date IN Date) 
+RETURN REAL
+IS
+  Age REAL;
+BEGIN
+  Age := (SYSDATE - Birth_Date) / 365.25;
+  RETURN Age;
+EXCEPTION
+  WHEN OTHERS THEN 
+    RETURN NULL;
+END Calculate_Age;</pre>
+
+                <h3>Unit 11: PL/SQL Procedures</h3>
+                <h4>Key Concepts</h4>
+                <p>A <strong>procedure</strong> is a module that <strong>performs actions</strong>. It doesn't return a value through RETURN (uses OUT/IN OUT parameters instead).</p>
+
+                <h4>Procedure Structure</h4>
+                <pre>PROCEDURE [schema.]name [(parameters)]
+IS|AS
+  [declarations]
+BEGIN
+  -- PL/SQL statements
+[EXCEPTION
+  exception_handlers]
+END [name];</pre>
+
+                <h4>Parameter Modes</h4>
+                <ul>
+                    <li><strong>IN</strong>: Passes value TO procedure (default) - read-only</li>
+                    <li><strong>OUT</strong>: Returns value FROM procedure - write-only, no default value</li>
+                    <li><strong>IN OUT</strong>: Both input and output - can read and write</li>
+                </ul>
+
+                <h4>Calling Procedures</h4>
+                <pre>-- Method 1: CALL statement
+CALL procedure_name(params);
+
+-- Method 2: EXEC (SQL*Plus)
+EXEC procedure_name(params);
+
+-- Method 3: Within PL/SQL block
+BEGIN
+  procedure_name(params);
+END;</pre>
+
+                <h4>Example: Divide Numbers</h4>
+                <pre>CREATE OR REPLACE PROCEDURE Divide_Numbers
+  (first_number IN INTEGER, 
+   second_number IN INTEGER, 
+   result OUT NUMBER)
+IS
+BEGIN
+  result := first_number / second_number;
+END;</pre>
+
+                <h3>Unit 12: Exception Handling</h3>
+                <h4>Key Concepts</h4>
+                <p>An <strong>exception</strong> is a PL/SQL error raised during execution. Exceptions can be handled to prevent program crashes.</p>
+
+                <h4>Exception Types</h4>
+                <ul>
+                    <li><strong>Predefined</strong>: Oracle-defined (NO_DATA_FOUND, TOO_MANY_ROWS, ZERO_DIVIDE, etc.)</li>
+                    <li><strong>Non-predefined</strong>: Oracle errors without names (use PRAGMA EXCEPTION_INIT)</li>
+                    <li><strong>User-defined</strong>: Custom exceptions declared in DECLARE section</li>
+                </ul>
+
+                <h4>Exception Handling Syntax</h4>
+                <pre>EXCEPTION
+  WHEN exception_name THEN
+    -- handle exception
+  WHEN OTHERS THEN
+    -- handle all other exceptions
+    error_code := SQLCODE;
+    error_msg := SQLERRM;
+END;</pre>
+
+                <h4>Key Functions</h4>
+                <ul>
+                    <li><strong>SQLCODE</strong>: Returns numeric error code</li>
+                    <li><strong>SQLERRM</strong>: Returns error message text</li>
+                    <li><strong>RAISE_APPLICATION_ERROR(code, message)</strong>: Custom errors (-20001 to -20999)</li>
+                </ul>
+
+                <h4>User-Defined Exception Example</h4>
+                <pre>DECLARE 
+  e_invalid_dept EXCEPTION;
+  v_deptno NUMBER := 500;
+BEGIN
+  UPDATE departments SET department_name = 'Test'
+  WHERE department_id = v_deptno;
+  
+  IF SQL%NOTFOUND THEN
+    RAISE e_invalid_dept;
+  END IF;
+  
+  COMMIT;
+EXCEPTION
+  WHEN e_invalid_dept THEN
+    DBMS_OUTPUT.PUT_LINE('Invalid department ID');
+END;</pre>
+
+                <h3>Unit 13: Packages</h3>
+                <h4>Key Concepts</h4>
+                <p>A <strong>package</strong> groups related PL/SQL types, variables, constants, exceptions, cursors, and subprograms into a single schema object.</p>
+
+                <h4>Package Components</h4>
+                <ul>
+                    <li><strong>Specification (Spec)</strong>: Interface - declares public items</li>
+                    <li><strong>Body</strong>: Implementation - defines spec items + private items</li>
+                </ul>
+
+                <h4>Package Specification</h4>
+                <pre>CREATE OR REPLACE PACKAGE package_name IS|AS
+  -- Public declarations
+  variable_name datatype;
+  PROCEDURE proc_name(params);
+  FUNCTION func_name(params) RETURN datatype;
+END package_name;</pre>
+
+                <h4>Package Body</h4>
+                <pre>CREATE OR REPLACE PACKAGE BODY package_name IS|AS
+  -- Private declarations (optional)
+  
+  -- Procedure implementations
+  PROCEDURE proc_name(params) IS
+  BEGIN
+    -- code
+  END;
+  
+  -- Function implementations
+  FUNCTION func_name(params) RETURN datatype IS
+  BEGIN
+    -- code
+    RETURN value;
+  END;
+END package_name;</pre>
+
+                <h4>Advantages</h4>
+                <ul>
+                    <li><strong>Modularity</strong>: Group related constructs</li>
+                    <li><strong>Information hiding</strong>: Public vs private</li>
+                    <li><strong>Performance</strong>: Loaded once into memory</li>
+                    <li><strong>Overloading</strong>: Multiple subprograms with same name</li>
+                </ul>
+
+                <h4>Calling Package Elements</h4>
+                <pre>-- Call package procedure
+package_name.procedure_name(params);
+
+-- Call package function
+v_result := package_name.function_name(params);
+
+-- Access package variable
+package_name.variable_name := value;</pre>
+            </div>
+        </section>
+
+        <!-- QUIZ SECTION -->
+        <section id="quiz" class="section">
+            <div class="card">
+                <h2>🎯 Practice Quiz</h2>
+                <p>Test your knowledge with mixed-difficulty questions. Select a unit to begin.</p>
+                
+                <div class="unit-selector" id="quizUnitSelector">
+                    <div class="unit-card" onclick="startQuiz(10)">
+                        <div class="unit-title">Unit 10</div>
+                        <div class="unit-desc">Functions</div>
+                    </div>
+                    <div class="unit-card" onclick="startQuiz(11)">
+                        <div class="unit-title">Unit 11</div>
+                        <div class="unit-desc">Procedures</div>
+                    </div>
+                    <div class="unit-card" onclick="startQuiz(12)">
+                        <div class="unit-title">Unit 12</div>
+                        <div class="unit-desc">Exceptions</div>
+                    </div>
+                    <div class="unit-card" onclick="startQuiz(13)">
+                        <div class="unit-title">Unit 13</div>
+                        <div class="unit-desc">Packages</div>
+                    </div>
+                </div>
+                
+                <div id="quizContent" style="display:none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="quizProgress" style="width: 0%"></div>
+                    </div>
+                    <div id="questionContainer"></div>
+                    <div class="controls">
+                        <button class="btn" onclick="checkAnswer()">Check Answer</button>
+                        <button class="btn btn-secondary" onclick="nextQuestion()">Next Question</button>
+                        <button class="btn btn-secondary" onclick="finishQuiz()">Finish Quiz</button>
+                    </div>
+                </div>
+                
+                <div id="quizResults" style="display:none;">
+                    <div class="score-display" id="finalScore"></div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="correctCount">0</div>
+                            <div class="stat-label">Correct</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="incorrectCount">0</div>
+                            <div class="stat-label">Incorrect</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="percentageScore">0%</div>
+                            <div class="stat-label">Score</div>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <button class="btn" onclick="resetQuiz()">Try Another Unit</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FLASHCARDS SECTION -->
+        <section id="flashcards" class="section">
+            <div class="card">
+                <h2>🃏 Flashcards</h2>
+                <p>50 essential concepts to master. Click to flip.</p>
+                
+                <div class="flashcard" id="flashcardDisplay" onclick="flipCard()">
+                    <div class="flashcard-label">Click to Flip</div>
+                    <div class="front">
+                        <div class="flashcard-text" id="flashcardFront"></div>
+                    </div>
+                    <div class="back">
+                        <div class="flashcard-text" id="flashcardBack"></div>
+                    </div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="flashcardProgress" style="width: 0%"></div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="prevCard()">← Previous</button>
+                    <button class="btn" onclick="nextCard()">Next →</button>
+                    <button class="btn btn-secondary" onclick="shuffleCards()">🔀 Shuffle</button>
+                </div>
+                
+                <div style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
+                    Card <span id="cardNumber">1</span> of <span id="totalCards">50</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- EXERCISES SECTION -->
+        <section id="exercises" class="section">
+            <div class="card">
+                <h2>💻 Coding Exercises</h2>
+                <p>Practice writing PL/SQL code with auto-checking.</p>
+                
+                <div class="unit-selector">
+                    <div class="unit-card" onclick="loadExercise(0)">
+                        <div class="unit-title">Exercise 1</div>
+                        <div class="unit-desc">Create a Function</div>
+                    </div>
+                    <div class="unit-card" onclick="loadExercise(1)">
+                        <div class="unit-title">Exercise 2</div>
+                        <div class="unit-desc">Create a Procedure</div>
+                    </div>
+                    <div class="unit-card" onclick="loadExercise(2)">
+                        <div class="unit-title">Exercise 3</div>
+                        <div class="unit-desc">Exception Handling</div>
+                    </div>
+                    <div class="unit-card" onclick="loadExercise(3)">
+                        <div class="unit-title">Exercise 4</div>
+                        <div class="unit-desc">Create a Package</div>
+                    </div>
+                </div>
+                
+                <div id="exerciseContent" style="display:none; margin-top: 2rem;">
+                    <h3 id="exerciseTitle"></h3>
+                    <p id="exerciseDescription" style="color: var(--text-secondary); margin-bottom: 1.5rem;"></p>
+                    
+                    <h4>Your Solution:</h4>
+                    <textarea id="codeEditor" placeholder="Write your PL/SQL code here..."></textarea>
+                    
+                    <div class="controls">
+                        <button class="btn" onclick="checkExercise()">Check Solution</button>
+                        <button class="btn btn-secondary" onclick="showHint()">💡 Hint</button>
+                        <button class="btn btn-secondary" onclick="showSolution()">📖 Show Solution</button>
+                    </div>
+                    
+                    <div id="exerciseFeedback"></div>
+                    <div id="exerciseHint" style="display:none;"></div>
+                    <div id="exerciseSolution" style="display:none;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROGRESS SECTION -->
+        <section id="progress" class="section">
+            <div class="card">
+                <h2>📊 Your Progress</h2>
+                <p>Track your learning journey</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalQuizzes">0</div>
+                        <div class="stat-label">Quizzes Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgScore">0%</div>
+                        <div class="stat-label">Average Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="cardsReviewed">0</div>
+                        <div class="stat-label">Cards Reviewed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="exercisesCompleted">0</div>
+                        <div class="stat-label">Exercises Done</div>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 2rem;">
+                    <h3>Unit Progress</h3>
+                    <div style="margin: 1rem 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Unit 10: Functions</span>
+                            <span id="unit10Progress">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="unit10Bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div style="margin: 1rem 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Unit 11: Procedures</span>
+                            <span id="unit11Progress">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="unit11Bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div style="margin: 1rem 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Unit 12: Exceptions</span>
+                            <span id="unit12Progress">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="unit12Bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div style="margin: 1rem 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Unit 13: Packages</span>
+                            <span id="unit13Progress">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="unit13Bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="controls" style="margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="resetProgress()">🔄 Reset Progress</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Data Storage
+        const questions = {
+            10: [ // Unit 10: Functions
+                {
+                    question: "What is the primary difference between a function and a procedure?",
+                    options: [
+                        "A function must return a value, a procedure does not",
+                        "A procedure can have parameters, a function cannot",
+                        "A function is faster than a procedure",
+                        "A procedure must return a value, a function does not"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Which keyword is used to return a value from a function?",
+                    options: ["RETURN", "OUTPUT", "RESULT", "SEND"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What parameter mode is used in functions?",
+                    options: ["Only IN mode", "Only OUT mode", "Both IN and OUT", "IN OUT mode"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Where can a PL/SQL function be called from?",
+                    options: [
+                        "SELECT statements and PL/SQL blocks",
+                        "Only from PL/SQL blocks",
+                        "Only from SELECT statements",
+                        "Only from other functions"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "What are formal parameters in a function?",
+                    options: [
+                        "Placeholders declared in the parameter list",
+                        "Values passed during function call",
+                        "Return values from the function",
+                        "Variables declared inside the function"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Which command drops a function?",
+                    options: ["DROP FUNCTION function_name", "DELETE FUNCTION function_name", "REMOVE FUNCTION function_name", "CLEAR FUNCTION function_name"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "A function must have at least one RETURN statement in its executable section.",
+                    options: ["True", "False"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What happens if formal and actual parameters don't match in number?",
+                    options: [
+                        "Compile-time error",
+                        "Runtime error",
+                        "Warning message",
+                        "Default values are used"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Write a function header that calculates salary bonus based on employee_id (returns NUMBER):",
+                    options: [
+                        "FUNCTION calc_bonus(emp_id IN NUMBER) RETURN NUMBER",
+                        "PROCEDURE calc_bonus(emp_id NUMBER) RETURN NUMBER",
+                        "FUNCTION calc_bonus(emp_id NUMBER) RETURNS NUMBER",
+                        "FUNCTION calc_bonus RETURN NUMBER(emp_id IN NUMBER)"
+                    ],
+                    correct: 0,
+                    difficulty: "hard"
+                },
+                {
+                    question: "Which section is optional in a function?",
+                    options: ["EXCEPTION section", "RETURN statement", "Function header", "BEGIN keyword"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Can you use OUT parameters in a function?",
+                    options: [
+                        "No, only IN parameters are allowed",
+                        "Yes, but it's not recommended",
+                        "Yes, it's the preferred way",
+                        "Only in package functions"
+                    ],
+                    correct: 1,
+                    difficulty: "medium"
+                },
+                {
+                    question: "What keyword creates or replaces an existing function?",
+                    options: ["CREATE OR REPLACE FUNCTION", "CREATE NEW FUNCTION", "UPDATE FUNCTION", "MODIFY FUNCTION"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Functions are compiled once and stored in the schema.",
+                    options: ["True", "False"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What is wrong with this function header?\nFUNCTION get_name RETURN VARCHAR2(p_id NUMBER)",
+                    options: [
+                        "Parameters should be before RETURN",
+                        "Missing IS or AS keyword",
+                        "VARCHAR2 cannot be used",
+                        "Missing semicolon"
+                    ],
+                    correct: 0,
+                    difficulty: "hard"
+                },
+                {
+                    question: "A function can call itself. This is called:",
+                    options: ["Recursion", "Iteration", "Looping", "Nesting"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Which is NOT a valid use of functions?",
+                    options: [
+                        "Modifying database tables directly",
+                        "Calculating values",
+                        "Data validation",
+                        "Format conversion"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "The RETURN datatype in function header must match the type of value returned in the function body.",
+                    options: ["True", "False"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Complete: FUNCTION calc(x NUMBER) ____ NUMBER IS",
+                    options: ["RETURN", "RETURNS", "OUTPUT", "RESULT"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Can a function have an EXCEPTION section?",
+                    options: ["Yes, it's optional", "No, only procedures can", "Yes, it's mandatory", "Only if it has parameters"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What's the benefit of using %TYPE in function parameters?",
+                    options: [
+                        "Ensures datatype matches table column",
+                        "Makes function run faster",
+                        "Required by Oracle",
+                        "Allows NULL values"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                }
+            ],
+            11: [ // Unit 11: Procedures
+                {
+                    question: "What is the main purpose of a procedure?",
+                    options: [
+                        "To perform one or more actions",
+                        "To return a single value",
+                        "To validate data only",
+                        "To declare variables"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Which parameter mode allows passing a value TO a procedure only?",
+                    options: ["IN", "OUT", "IN OUT", "INOUT"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Which parameter mode returns a value FROM a procedure?",
+                    options: ["OUT", "IN", "RETURN", "RESULT"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What is special about IN OUT parameters?",
+                    options: [
+                        "Can pass value in and return value back",
+                        "Only used for strings",
+                        "Must be declared as variables",
+                        "Cannot have default values"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Can an OUT parameter have a default value?",
+                    options: ["No", "Yes", "Only if it's also IN", "Only in packages"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Which is a valid way to call a procedure?",
+                    options: [
+                        "All: CALL, EXEC, and within BEGIN..END",
+                        "Only CALL",
+                        "Only EXEC",
+                        "Only within BEGIN..END"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "What must match between formal and actual parameters?",
+                    options: [
+                        "Number, order, and datatype",
+                        "Only number",
+                        "Only datatype",
+                        "Only order"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "An actual parameter for an OUT parameter must be a:",
+                    options: ["Variable", "Literal value", "Expression", "Constant"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Complete the procedure header:\nPROCEDURE update_salary(emp_id ___ NUMBER, new_sal ___ NUMBER)",
+                    options: ["IN, IN", "OUT, OUT", "IN, OUT", "IN OUT, IN OUT"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "What command drops a procedure?",
+                    options: ["DROP PROCEDURE", "DELETE PROCEDURE", "REMOVE PROCEDURE", "CLEAR PROCEDURE"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "IN parameters are read-only inside the procedure.",
+                    options: ["True", "False"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "A procedure can call itself (recursion).",
+                    options: ["True", "False"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What's wrong with this?\nPROCEDURE test(x OUT NUMBER := 10) IS",
+                    options: [
+                        "OUT parameters cannot have default values",
+                        "Missing BEGIN",
+                        "Wrong datatype",
+                        "Nothing is wrong"
+                    ],
+                    correct: 0,
+                    difficulty: "hard"
+                },
+                {
+                    question: "Which keyword is used in procedure header?",
+                    options: ["IS or AS", "RETURN", "BEGIN", "DECLARE"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Can you use a SELECT statement inside a procedure?",
+                    options: ["Yes", "No", "Only with cursors", "Only if it has OUT parameters"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What is the default parameter mode if not specified?",
+                    options: ["IN", "OUT", "IN OUT", "None"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "A procedure header does NOT include:",
+                    options: [
+                        "RETURN datatype",
+                        "Parameter list",
+                        "Procedure name",
+                        "IS or AS keyword"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "CALL procedure_name() requires parentheses even without parameters.",
+                    options: ["True", "False"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Can an IN parameter value be assigned to itself inside the procedure?",
+                    options: ["No", "Yes", "Only once", "Only if declared as variable"],
+                    correct: 0,
+                    difficulty: "hard"
+                },
+                {
+                    question: "What makes procedures reusable?",
+                    options: [
+                        "Stored in schema, compiled once",
+                        "Can have parameters",
+                        "Written in PL/SQL",
+                        "Can call functions"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                }
+            ],
+            12: [ // Unit 12: Exceptions
+                {
+                    question: "What is a PL/SQL exception?",
+                    options: [
+                        "An error raised during program execution",
+                        "A warning message",
+                        "A debug statement",
+                        "A comment in code"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Which keyword starts the exception handling section?",
+                    options: ["EXCEPTION", "ERROR", "CATCH", "HANDLE"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "NO_DATA_FOUND is which type of exception?",
+                    options: ["Predefined Oracle exception", "User-defined", "Non-predefined", "System exception"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What does SQLCODE return?",
+                    options: [
+                        "Numeric error code",
+                        "Error message text",
+                        "Line number of error",
+                        "Exception name"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What does SQLERRM return?",
+                    options: [
+                        "Error message text",
+                        "Numeric error code",
+                        "Exception type",
+                        "Stack trace"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Which exception handler catches all exceptions?",
+                    options: ["WHEN OTHERS THEN", "WHEN ALL THEN", "WHEN EXCEPTION THEN", "CATCH ALL"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "User-defined exception error codes must be between:",
+                    options: ["-20001 and -20999", "-1 and -100", "1 and 100", "-30000 and -30999"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Where must user-defined exceptions be declared?",
+                    options: ["DECLARE section", "BEGIN section", "EXCEPTION section", "After END"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Which keyword explicitly raises an exception?",
+                    options: ["RAISE", "THROW", "ERROR", "TRIGGER"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "TOO_MANY_ROWS exception is raised when:",
+                    options: [
+                        "SELECT INTO returns multiple rows",
+                        "No rows are found",
+                        "Division by zero",
+                        "NULL value inserted"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Can you have multiple exception handlers in one block?",
+                    options: ["Yes", "No", "Only two", "Only if using WHEN OTHERS"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "WHEN OTHERS must be the ___ exception handler.",
+                    options: ["Last", "First", "Second", "Any position"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "What does RAISE_APPLICATION_ERROR do?",
+                    options: [
+                        "Issues custom error messages",
+                        "Stops program execution",
+                        "Logs errors to file",
+                        "Sends email alerts"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "ZERO_DIVIDE is an example of:",
+                    options: ["Predefined exception", "User-defined exception", "Non-predefined exception", "System exception"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Non-predefined exceptions require:",
+                    options: [
+                        "PRAGMA EXCEPTION_INIT",
+                        "RAISE statement",
+                        "SQLCODE",
+                        "Custom error message"
+                    ],
+                    correct: 0,
+                    difficulty: "hard"
+                },
+                {
+                    question: "After an exception is handled, the program:",
+                    options: [
+                        "Terminates gracefully",
+                        "Continues from where error occurred",
+                        "Restarts the block",
+                        "Rolls back all changes"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Unhandled exceptions cause the program to:",
+                    options: [
+                        "Terminate abruptly",
+                        "Continue execution",
+                        "Return NULL",
+                        "Wait for user input"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "You can handle the same exception in multiple WHEN clauses.",
+                    options: ["False", "True"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Complete: WHEN exception_name OR another_exception ___",
+                    options: ["THEN", "DO", "BEGIN", "CATCH"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Exception handling helps:",
+                    options: [
+                        "Prevent program crashes",
+                        "Make code run faster",
+                        "Reduce memory usage",
+                        "Compile code"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                }
+            ],
+            13: [ // Unit 13: Packages
+                {
+                    question: "What are the two parts of a package?",
+                    options: [
+                        "Specification and Body",
+                        "Header and Footer",
+                        "Public and Private",
+                        "Declaration and Execution"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Which part of a package is the interface?",
+                    options: ["Specification", "Body", "Both", "Neither"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Items in the package specification are:",
+                    options: ["Public", "Private", "Protected", "Hidden"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Items declared only in the package body are:",
+                    options: ["Private", "Public", "Protected", "Visible"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Can a package specification exist without a body?",
+                    options: ["Yes, for constants and variables only", "No, never", "Yes, always", "Only for functions"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "What advantage does a package provide?",
+                    options: [
+                        "All: Modularity, Performance, Information hiding",
+                        "Only Modularity",
+                        "Only Performance",
+                        "Only Information hiding"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Packages are loaded into memory:",
+                    options: [
+                        "Once, when first referenced",
+                        "Every time they're called",
+                        "At database startup",
+                        "Never"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "How many copies of a package exist in memory for all users?",
+                    options: ["One", "One per user", "Multiple", "None"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Which must be created first?",
+                    options: [
+                        "Package specification",
+                        "Package body",
+                        "Either one",
+                        "Both simultaneously"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "How do you call a package procedure?",
+                    options: [
+                        "package_name.procedure_name(params)",
+                        "procedure_name.package_name(params)",
+                        "CALL package_name(procedure_name)",
+                        "EXEC procedure_name IN package_name"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Can you overload subprograms in a package?",
+                    options: ["Yes", "No", "Only functions", "Only procedures"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "What does overloading mean?",
+                    options: [
+                        "Multiple subprograms with same name but different parameters",
+                        "Too many procedures",
+                        "Package is too large",
+                        "Using too much memory"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Private constructs in package body must be declared:",
+                    options: [
+                        "Before they are referenced",
+                        "After they are used",
+                        "In the specification",
+                        "Anywhere"
+                    ],
+                    correct: 0,
+                    difficulty: "hard"
+                },
+                {
+                    question: "Which command drops the entire package?",
+                    options: [
+                        "DROP PACKAGE package_name",
+                        "DROP PACKAGE BODY package_name",
+                        "DELETE PACKAGE package_name",
+                        "REMOVE PACKAGE package_name"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Which command drops only the package body?",
+                    options: [
+                        "DROP PACKAGE BODY package_name",
+                        "DROP PACKAGE package_name",
+                        "DELETE BODY package_name",
+                        "REMOVE PACKAGE BODY"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Public constructs are accessible from:",
+                    options: [
+                        "Outside the package",
+                        "Only inside the package",
+                        "Only the specification",
+                        "Only the body"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Package variables are initialized to ___ by default.",
+                    options: ["NULL", "0", "Empty string", "Error"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "What is a bodiless package?",
+                    options: [
+                        "Package with only specification (constants/variables)",
+                        "Package without specification",
+                        "Empty package",
+                        "Invalid package"
+                    ],
+                    correct: 0,
+                    difficulty: "hard"
+                },
+                {
+                    question: "Package state persists for:",
+                    options: [
+                        "Duration of user session",
+                        "One execution only",
+                        "Forever",
+                        "Until database restart"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Packages improve performance by:",
+                    options: [
+                        "Loading all components at once",
+                        "Running faster code",
+                        "Using less memory",
+                        "Compiling automatically"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                }
+            ]
+        };
+
+        const flashcards = [
+            // Unit 10: Functions (12 cards)
+            { front: "What is a PL/SQL Function?", back: "A named PL/SQL block that RETURNS a value. Used for calculations, validations, and data transformations." },
+            { front: "Function Parameter Mode", back: "Functions use only IN mode (read-only). Cannot use OUT or IN OUT parameters." },
+            { front: "RETURN Statement", back: "Mandatory in functions. Returns a value to the calling program. Syntax: RETURN value;" },
+            { front: "Formal vs Actual Parameters", back: "Formal = placeholders in header\nActual = values passed during call\nMust match in number, order, and type" },
+            { front: "Create Function Syntax", back: "CREATE OR REPLACE FUNCTION name(params) RETURN datatype IS\nBEGIN\n  RETURN value;\nEND;" },
+            { front: "Drop Function", back: "DROP FUNCTION function_name;" },
+            { front: "Calling a Function", back: "v_result := function_name(params);\nOR in SELECT: SELECT function_name(params) FROM dual;" },
+            { front: "Function Header Components", back: "Name, Parameter List (optional), RETURN datatype, IS/AS keyword" },
+            { front: "When to use Functions", back: "Calculations, data validation, format conversion, returning single values to SELECT statements" },
+            { front: "%TYPE in Functions", back: "Matches parameter datatype to table column. Example: emp_id employees.employee_id%TYPE" },
+            { front: "Function Exception Handling", back: "Optional EXCEPTION section. Can RETURN value or NULL in exception handler." },
+            { front: "Function Reusability", back: "Stored in schema, compiled once, can be called multiple times from SQL or PL/SQL" },
+            
+            // Unit 11: Procedures (12 cards)
+            { front: "What is a PL/SQL Procedure?", back: "A named PL/SQL block that PERFORMS ACTIONS. Does not return value via RETURN (uses OUT parameters)." },
+            { front: "IN Parameter Mode", back: "Passes value TO procedure (read-only). Can have default values. Default mode if not specified." },
+            { front: "OUT Parameter Mode", back: "Returns value FROM procedure (write-only). Cannot have default values. Must be a variable." },
+            { front: "IN OUT Parameter Mode", back: "Both input and output. Can read and write. Cannot have default values. Must be a variable." },
+            { front: "Create Procedure Syntax", back: "CREATE OR REPLACE PROCEDURE name(params) IS\nBEGIN\n  -- statements\nEND;" },
+            { front: "Calling a Procedure", back: "CALL proc_name(params);\nEXEC proc_name(params);\nBEGIN proc_name(params); END;" },
+            { front: "Drop Procedure", back: "DROP PROCEDURE procedure_name;" },
+            { front: "Parameter Matching Rule", back: "Formal and actual parameters must match in: Number, Order, Datatype (or compatible types)" },
+            { front: "OUT Parameter Restrictions", back: "No default values, cannot assign to itself, actual parameter must be variable, not literal" },
+            { front: "Procedure vs Function", back: "Procedure: performs actions, uses OUT parameters\nFunction: returns value via RETURN, used in SQL" },
+            { front: "When to use Procedures", back: "Data manipulation (INSERT/UPDATE/DELETE), complex business logic, multiple OUT values needed" },
+            { front: "Procedure Header", back: "Name, Parameter list with modes (IN/OUT/IN OUT), IS/AS keyword. NO RETURN datatype." },
+            
+            // Unit 12: Exceptions (13 cards)
+            { front: "What is a PL/SQL Exception?", back: "An error raised during program execution. Can be handled to prevent crashes." },
+            { front: "Exception Types", back: "1. Predefined (NO_DATA_FOUND)\n2. Non-predefined (use PRAGMA)\n3. User-defined (custom)" },
+            { front: "EXCEPTION Section", back: "Optional block starting with EXCEPTION keyword. Contains WHEN...THEN handlers." },
+            { front: "WHEN OTHERS", back: "Catches all exceptions not handled by specific handlers. Must be LAST handler." },
+            { front: "SQLCODE Function", back: "Returns numeric error code. 0 = success, negative = error. Use in WHEN OTHERS." },
+            { front: "SQLERRM Function", back: "Returns error message text. Use in WHEN OTHERS to log details." },
+            { front: "Common Predefined Exceptions", back: "NO_DATA_FOUND, TOO_MANY_ROWS, ZERO_DIVIDE, DUP_VAL_ON_INDEX, INVALID_CURSOR" },
+            { front: "User-Defined Exception", back: "DECLARE: e_name EXCEPTION;\nRAISE e_name; (in code)\nWHEN e_name THEN... (in handler)" },
+            { front: "RAISE_APPLICATION_ERROR", back: "Syntax: RAISE_APPLICATION_ERROR(code, message);\nCode: -20001 to -20999\nReturns custom error" },
+            { front: "RAISE Statement", back: "Explicitly raises an exception. Used with user-defined exceptions or to re-raise in handler." },
+            { front: "Exception Propagation", back: "If not handled in current block, propagates to outer block or calling environment." },
+            { front: "PRAGMA EXCEPTION_INIT", back: "Associates Oracle error code with user-defined exception name. For non-predefined exceptions." },
+            { front: "Exception Best Practice", back: "Handle expected errors, use WHEN OTHERS for unexpected, log errors, don't suppress exceptions" },
+            
+            // Unit 13: Packages (13 cards)
+            { front: "What is a PL/SQL Package?", back: "Schema object grouping related types, variables, cursors, exceptions, procedures, and functions." },
+            { front: "Package Specification", back: "Interface/public API. Declares what's accessible outside package. Created FIRST." },
+            { front: "Package Body", back: "Implementation. Contains code for spec items + private items. Created AFTER spec." },
+            { front: "Public vs Private", back: "Public: in spec, accessible outside\nPrivate: in body only, hidden from outside" },
+            { front: "Create Package Spec", back: "CREATE OR REPLACE PACKAGE pkg_name IS\n  -- public declarations\nEND pkg_name;" },
+            { front: "Create Package Body", back: "CREATE OR REPLACE PACKAGE BODY pkg_name IS\n  -- private items\n  -- implementations\nEND pkg_name;" },
+            { front: "Calling Package Items", back: "package_name.procedure_name(params);\nv_result := package_name.function_name(params);\npackage_name.variable_name" },
+            { front: "Package Advantages", back: "Modularity, Information hiding, Performance (loaded once), Overloading, Easier maintenance" },
+            { front: "Package Overloading", back: "Multiple subprograms with same name but different parameters (number/type). Same package only." },
+            { front: "Drop Package", back: "DROP PACKAGE pkg_name; (drops spec+body)\nDROP PACKAGE BODY pkg_name; (body only)" },
+            { front: "Bodiless Package", back: "Package with only specification. Used for constants and variables. No body needed." },
+            { front: "Package State", back: "Variables persist for session duration. Shared across all calls in same session." },
+            { front: "Package Initialization", back: "Optional BEGIN..END in body. Runs once when package first loaded. Initializes variables." }
+        ];
+
+        const exercises = [
+            {
+                title: "Create a Temperature Conversion Function",
+                description: "Write a function named CELSIUS_TO_FAHRENHEIT that accepts temperature in Celsius and returns temperature in Fahrenheit. Formula: F = (C * 9/5) + 32",
+                keywords: ["FUNCTION", "CELSIUS_TO_FAHRENHEIT", "RETURN", "9", "5", "32"],
+                hint: "Start with CREATE OR REPLACE FUNCTION. Parameter should be IN mode. Use the formula F = (C * 9/5) + 32 in the RETURN statement.",
+                solution: `CREATE OR REPLACE FUNCTION Celsius_To_Fahrenheit(temp_c IN NUMBER)
+RETURN NUMBER
+IS
+BEGIN
+  RETURN (temp_c * 9/5) + 32;
+END Celsius_To_Fahrenheit;`
+            },
+            {
+                title: "Create a Procedure with OUT Parameter",
+                description: "Write a procedure named GET_EMP_DETAILS that accepts employee_id (IN) and returns employee name and salary (OUT parameters). Use a SELECT INTO statement.",
+                keywords: ["PROCEDURE", "GET_EMP_DETAILS", "IN", "OUT", "SELECT", "INTO"],
+                hint: "Use three parameters: emp_id IN NUMBER, emp_name OUT VARCHAR2, emp_sal OUT NUMBER. Use SELECT first_name, salary INTO... FROM employees WHERE employee_id = emp_id;",
+                solution: `CREATE OR REPLACE PROCEDURE Get_Emp_Details
+  (emp_id IN NUMBER,
+   emp_name OUT VARCHAR2,
+   emp_sal OUT NUMBER)
+IS
+BEGIN
+  SELECT first_name, salary
+  INTO emp_name, emp_sal
+  FROM employees
+  WHERE employee_id = emp_id;
+END Get_Emp_Details;`
+            },
+            {
+                title: "Add Exception Handling",
+                description: "Write a function GET_DEPT_NAME that accepts department_id and returns department_name. Handle NO_DATA_FOUND exception and return 'Unknown Department' if not found.",
+                keywords: ["FUNCTION", "EXCEPTION", "NO_DATA_FOUND", "WHEN", "RETURN"],
+                hint: "Use SELECT department_name INTO in the BEGIN section. Add EXCEPTION section with WHEN NO_DATA_FOUND THEN RETURN 'Unknown Department';",
+                solution: `CREATE OR REPLACE FUNCTION Get_Dept_Name(dept_id IN NUMBER)
+RETURN VARCHAR2
+IS
+  dept_name VARCHAR2(50);
+BEGIN
+  SELECT department_name INTO dept_name
+  FROM departments
+  WHERE department_id = dept_id;
+  RETURN dept_name;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RETURN 'Unknown Department';
+  WHEN OTHERS THEN
+    RETURN 'Error: ' || SQLERRM;
+END Get_Dept_Name;`
+            },
+            {
+                title: "Create a Simple Package",
+                description: "Create a package MATH_PKG with: 1) Public function ADD_NUMS(a,b) that returns a+b, 2) Public function MULTIPLY_NUMS(a,b) that returns a*b. Create both specification and body.",
+                keywords: ["PACKAGE", "MATH_PKG", "FUNCTION", "ADD_NUMS", "MULTIPLY_NUMS", "PACKAGE BODY"],
+                hint: "First create the spec with FUNCTION declarations. Then create the body with FUNCTION implementations. Both functions should accept two NUMBER parameters and RETURN NUMBER.",
+                solution: `-- Package Specification
+CREATE OR REPLACE PACKAGE Math_Pkg IS
+  FUNCTION Add_Nums(a NUMBER, b NUMBER) RETURN NUMBER;
+  FUNCTION Multiply_Nums(a NUMBER, b NUMBER) RETURN NUMBER;
+END Math_Pkg;
+/
+
+-- Package Body
+CREATE OR REPLACE PACKAGE BODY Math_Pkg IS
+  FUNCTION Add_Nums(a NUMBER, b NUMBER) RETURN NUMBER IS
+  BEGIN
+    RETURN a + b;
+  END Add_Nums;
+  
+  FUNCTION Multiply_Nums(a NUMBER, b NUMBER) RETURN NUMBER IS
+  BEGIN
+    RETURN a * b;
+  END Multiply_Nums;
+END Math_Pkg;
+/`
+            }
+        ];
+
+        // State Management
+        let currentQuiz = null;
+        let currentQuestionIndex = 0;
+        let quizAnswers = [];
+        let currentCardIndex = 0;
+        let currentFlashcards = [...flashcards];
+        let progressData = {
+            quizzesTaken: 0,
+            totalScore: 0,
+            cardsReviewed: new Set(),
+            exercisesCompleted: new Set(),
+            unitScores: { 10: [], 11: [], 12: [], 13: [] }
+        };
+
+        // Load progress from session storage
+        function loadProgress() {
+            const saved = sessionStorage.getItem('plsql_progress');
+            if (saved) {
+                const data = JSON.parse(saved);
+                progressData = {
+                    ...data,
+                    cardsReviewed: new Set(data.cardsReviewed),
+                    exercisesCompleted: new Set(data.exercisesCompleted)
+                };
+            }
+            updateProgressDisplay();
+        }
+
+        // Save progress to session storage
+        function saveProgress() {
+            const toSave = {
+                ...progressData,
+                cardsReviewed: Array.from(progressData.cardsReviewed),
+                exercisesCompleted: Array.from(progressData.exercisesCompleted)
+            };
+            sessionStorage.setItem('plsql_progress', JSON.stringify(toSave));
+            updateProgressDisplay();
+        }
+
+        // Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (sectionId === 'progress') {
+                updateProgressDisplay();
+            }
+        }
+
+        // Quiz Functions
+        function startQuiz(unit) {
+            currentQuiz = unit;
+            currentQuestionIndex = 0;
+            quizAnswers = [];
+            
+            document.querySelectorAll('.unit-card').forEach(c => c.classList.remove('selected'));
+            event.target.closest('.unit-card').classList.add('selected');
+            
+            document.getElementById('quizUnitSelector').style.display = 'none';
+            document.getElementById('quizContent').style.display = 'block';
+            document.getElementById('quizResults').style.display = 'none';
+            
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const question = questions[currentQuiz][currentQuestionIndex];
+            const progress = ((currentQuestionIndex + 1) / questions[currentQuiz].length) * 100;
+            document.getElementById('quizProgress').style.width = progress + '%';
+            
+            let html = `
+                <div class="question-card">
+                    <div style="color: var(--text-secondary); margin-bottom: 0.5rem;">
+                        Question ${currentQuestionIndex + 1} of ${questions[currentQuiz].length}
+                        <span class="difficulty-badge ${question.difficulty}">${question.difficulty}</span>
+                    </div>
+                    <div class="question-text">${question.question}</div>
+                    <div class="options">
+            `;
+            
+            question.options.forEach((option, idx) => {
+                html += `<div class="option" onclick="selectOption(${idx})">${option}</div>`;
+            });
+            
+            html += '</div></div>';
+            document.getElementById('questionContainer').innerHTML = html;
+        }
+
+        function selectOption(idx) {
+            document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            event.target.classList.add('selected');
+            quizAnswers[currentQuestionIndex] = idx;
+        }
+
+        function checkAnswer() {
+            const question = questions[currentQuiz][currentQuestionIndex];
+            const userAnswer = quizAnswers[currentQuestionIndex];
+            
+            if (userAnswer === undefined) {
+                alert('Please select an answer first!');
+                return;
+            }
+            
+            const options = document.querySelectorAll('.option');
+            options[question.correct].classList.add('correct');
+            
+            if (userAnswer !== question.correct) {
+                options[userAnswer].classList.add('incorrect');
+            }
+            
+            options.forEach(o => o.style.pointerEvents = 'none');
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions[currentQuiz].length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            const correct = quizAnswers.filter((ans, idx) => 
+                ans === questions[currentQuiz][idx].correct
+            ).length;
+            const total = questions[currentQuiz].length;
+            const percentage = Math.round((correct / total) * 100);
+            
+            // Update progress
+            progressData.quizzesTaken++;
+            progressData.totalScore += percentage;
+            progressData.unitScores[currentQuiz].push(percentage);
+            saveProgress();
+            
+            document.getElementById('quizContent').style.display = 'none';
+            document.getElementById('quizResults').style.display = 'block';
+            
+            document.getElementById('finalScore').textContent = `${percentage}%`;
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('incorrectCount').textContent = total - correct;
+            document.getElementById('percentageScore').textContent = `${percentage}%`;
+        }
+
+        function resetQuiz() {
+            document.getElementById('quizUnitSelector').style.display = 'grid';
+            document.getElementById('quizResults').style.display = 'none';
+            document.querySelectorAll('.unit-card').forEach(c => c.classList.remove('selected'));
+        }
+
+        // Flashcard Functions
+        function displayFlashcard() {
+            const card = currentFlashcards[currentCardIndex];
+            document.getElementById('flashcardFront').textContent = card.front;
+            document.getElementById('flashcardBack').textContent = card.back;
+            document.getElementById('flashcardDisplay').classList.remove('flipped');
+            document.getElementById('cardNumber').textContent = currentCardIndex + 1;
+            document.getElementById('totalCards').textContent = currentFlashcards.length;
+            
+            const progress = ((currentCardIndex + 1) / currentFlashcards.length) * 100;
+            document.getElementById('flashcardProgress').style.width = progress + '%';
+            
+            progressData.cardsReviewed.add(currentCardIndex);
+            saveProgress();
+        }
+
+        function flipCard() {
+            document.getElementById('flashcardDisplay').classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            if (currentCardIndex < currentFlashcards.length - 1) {
+                currentCardIndex++;
+            } else {
+                currentCardIndex = 0;
+            }
+            displayFlashcard();
+        }
+
+        function prevCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+            } else {
+                currentCardIndex = currentFlashcards.length - 1;
+            }
+            displayFlashcard();
+        }
+
+        function shuffleCards() {
+            currentFlashcards = [...flashcards].sort(() => Math.random() - 0.5);
+            currentCardIndex = 0;
+            displayFlashcard();
+        }
+
+        // Exercise Functions
+        function loadExercise(idx) {
+            const exercise = exercises[idx];
+            
+            document.querySelectorAll('.unit-card').forEach(c => c.classList.remove('selected'));
+            event.target.closest('.unit-card').classList.add('selected');
+            
+            document.getElementById('exerciseContent').style.display = 'block';
+            document.getElementById('exerciseTitle').textContent = exercise.title;
+            document.getElementById('exerciseDescription').textContent = exercise.description;
+            document.getElementById('codeEditor').value = '';
+            document.getElementById('exerciseFeedback').innerHTML = '';
+            document.getElementById('exerciseHint').style.display = 'none';
+            document.getElementById('exerciseSolution').style.display = 'none';
+            
+            window.currentExercise = idx;
+        }
+
+        function checkExercise() {
+            const exercise = exercises[window.currentExercise];
+            const userCode = document.getElementById('codeEditor').value.toUpperCase();
+            
+            const hasAllKeywords = exercise.keywords.every(keyword => 
+                userCode.includes(keyword.toUpperCase())
+            );
+            
+            const feedback = document.getElementById('exerciseFeedback');
+            
+            if (hasAllKeywords) {
+                feedback.innerHTML = '<div class="feedback success">✓ Excellent! Your solution includes all required elements.</div>';
+                progressData.exercisesCompleted.add(window.currentExercise);
+                saveProgress();
+            } else {
+                const missing = exercise.keywords.filter(k => !userCode.includes(k.toUpperCase()));
+                feedback.innerHTML = `<div class="feedback error">✗ Missing required elements: ${missing.join(', ')}</div>`;
+            }
+        }
+
+        function showHint() {
+            const exercise = exercises[window.currentExercise];
+            const hint = document.getElementById('exerciseHint');
+            hint.innerHTML = `<div class="feedback" style="border-color: var(--warning); background: rgba(245, 158, 11, 0.1);"><strong>💡 Hint:</strong> ${exercise.hint}</div>`;
+            hint.style.display = 'block';
+        }
+
+        function showSolution() {
+            const exercise = exercises[window.currentExercise];
+            const solution = document.getElementById('exerciseSolution');
+            solution.innerHTML = `<h4>📖 Model Solution:</h4><pre>${exercise.solution}</pre>`;
+            solution.style.display = 'block';
+        }
+
+        // Progress Functions
+        function updateProgressDisplay() {
+            document.getElementById('totalQuizzes').textContent = progressData.quizzesTaken;
+            
+            const avgScore = progressData.quizzesTaken > 0 
+                ? Math.round(progressData.totalScore / progressData.quizzesTaken) 
+                : 0;
+            document.getElementById('avgScore').textContent = avgScore + '%';
+            
+            document.getElementById('cardsReviewed').textContent = progressData.cardsReviewed.size;
+            document.getElementById('exercisesCompleted').textContent = progressData.exercisesCompleted.size;
+            
+            // Unit progress
+            [10, 11, 12, 13].forEach(unit => {
+                const scores = progressData.unitScores[unit];
+                const avg = scores.length > 0 ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length) : 0;
+                document.getElementById(`unit${unit}Progress`).textContent = avg + '%';
+                document.getElementById(`unit${unit}Bar`).style.width = avg + '%';
+            });
+        }
+
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                sessionStorage.removeItem('plsql_progress');
+                progressData = {
+                    quizzesTaken: 0,
+                    totalScore: 0,
+                    cardsReviewed: new Set(),
+                    exercisesCompleted: new Set(),
+                    unitScores: { 10: [], 11: [], 12: [], 13: [] }
+                };
+                updateProgressDisplay();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProgress();
+            displayFlashcard();
+        });
+    </script>
+</body>
+</html>
