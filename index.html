@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PL/SQL Master Guide - Full Marks</title>
+    <title>PL/SQL Master Guide - Complete Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -60,7 +60,6 @@
             padding: 3rem 1rem;
             background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
             border-bottom: 2px solid var(--border);
-            /* position: sticky; */
             top: 0;
             z-index: 100;
             backdrop-filter: blur(10px);
@@ -446,6 +445,45 @@
             color: var(--accent);
         }
 
+        .highlight-box {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .warning-box {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .comparison-table th {
+            background: var(--bg-tertiary);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem 0.5rem;
@@ -482,12 +520,13 @@
 <body>
     <header>
         <h1>PL/SQL Master Guide</h1>
-        <div class="subtitle">Your Complete Study System for Full Marks</div>
+        <div class="subtitle">Complete Edition - All Topics for Full Marks</div>
         <nav>
             <button class="nav-btn active" onclick="showSection('guide')">Study Guide</button>
+            <button class="nav-btn" onclick="showSection('patterns')">Coding Patterns</button>
             <button class="nav-btn" onclick="showSection('quiz')">Practice Quiz</button>
             <button class="nav-btn" onclick="showSection('flashcards')">Flashcards</button>
-            <button class="nav-btn" onclick="showSection('exercises')">Coding Exercises</button>
+            <button class="nav-btn" onclick="showSection('exercises')">Exercises</button>
             <button class="nav-btn" onclick="showSection('progress')">Progress</button>
         </nav>
     </header>
@@ -682,28 +721,426 @@ package_name.variable_name := value;</pre>
             </div>
         </section>
 
-        <!-- QUIZ SECTION -->
+        <!-- CODING PATTERNS SECTION (NEW!) -->
+        <section id="patterns" class="section">
+            <div class="card">
+                <h2>💡 Essential Coding Patterns</h2>
+                <p>Master these patterns that appear in every lab and exam!</p>
+
+                <h3>1. SELECT INTO - Retrieving Data</h3>
+                <div class="highlight-box">
+                    <p><strong>Purpose:</strong> Retrieve data from database into PL/SQL variables</p>
+                </div>
+
+                <h4>Basic Pattern</h4>
+                <pre>DECLARE
+  v_fname VARCHAR2(20);
+  v_lname VARCHAR2(20);
+BEGIN
+  SELECT first_name, last_name 
+  INTO v_fname, v_lname
+  FROM employees
+  WHERE employee_id = 100;
+  
+  DBMS_OUTPUT.PUT_LINE(v_fname || ' ' || v_lname);
+END;</pre>
+
+                <h4>With Exception Handling</h4>
+                <pre>DECLARE
+  v_salary NUMBER;
+BEGIN
+  SELECT salary INTO v_salary
+  FROM employees WHERE employee_id = 999;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('Employee not found');
+  WHEN TOO_MANY_ROWS THEN
+    DBMS_OUTPUT.PUT_LINE('Multiple rows returned');
+END;</pre>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important:</strong> SELECT INTO must return exactly ONE row, otherwise:
+                    <ul>
+                        <li>0 rows → NO_DATA_FOUND exception</li>
+                        <li>2+ rows → TOO_MANY_ROWS exception</li>
+                    </ul>
+                </div>
+
+                <h3>2. %TYPE and %ROWTYPE - Data Type Anchoring</h3>
+                
+                <h4>%TYPE - Single Column</h4>
+                <div class="highlight-box">
+                    <p><strong>Purpose:</strong> Match a variable's datatype to a table column</p>
+                </div>
+                <pre>DECLARE
+  v_emp_id employees.employee_id%TYPE;    -- Same as NUMBER
+  v_name employees.first_name%TYPE;        -- Same as VARCHAR2(20)
+BEGIN
+  v_emp_id := 100;
+  SELECT first_name INTO v_name
+  FROM employees WHERE employee_id = v_emp_id;
+END;</pre>
+
+                <h4>%ROWTYPE - Entire Row</h4>
+                <div class="highlight-box">
+                    <p><strong>Purpose:</strong> Create a record structure matching all columns in a table</p>
+                </div>
+                <pre>DECLARE
+  emp_rec employees%ROWTYPE;  -- Contains all employee columns
+BEGIN
+  SELECT * INTO emp_rec
+  FROM employees WHERE employee_id = 100;
+  
+  DBMS_OUTPUT.PUT_LINE('Name: ' || emp_rec.first_name);
+  DBMS_OUTPUT.PUT_LINE('Salary: ' || emp_rec.salary);
+  DBMS_OUTPUT.PUT_LINE('Hire Date: ' || emp_rec.hire_date);
+END;</pre>
+
+                <h4>Comparison Table</h4>
+                <table class="comparison-table">
+                    <tr>
+                        <th>Feature</th>
+                        <th>%TYPE</th>
+                        <th>%ROWTYPE</th>
+                    </tr>
+                    <tr>
+                        <td>Purpose</td>
+                        <td>Single column datatype</td>
+                        <td>Complete row structure</td>
+                    </tr>
+                    <tr>
+                        <td>Example</td>
+                        <td>v_sal employees.salary%TYPE</td>
+                        <td>emp_rec employees%ROWTYPE</td>
+                    </tr>
+                    <tr>
+                        <td>Access</td>
+                        <td>v_sal := 5000;</td>
+                        <td>emp_rec.salary := 5000;</td>
+                    </tr>
+                    <tr>
+                        <td>Use with</td>
+                        <td>SELECT col INTO v_sal</td>
+                        <td>SELECT * INTO emp_rec</td>
+                    </tr>
+                </table>
+
+                <h3>3. Explicit Cursors - Processing Multiple Rows</h3>
+                <div class="highlight-box">
+                    <p><strong>Purpose:</strong> Process query results one row at a time (when SELECT INTO would return TOO_MANY_ROWS)</p>
+                </div>
+
+                <h4>Complete Cursor Lifecycle</h4>
+                <pre>DECLARE
+  CURSOR emp_cursor IS
+    SELECT employee_id, first_name, salary
+    FROM employees
+    WHERE department_id = 50;
+  
+  v_emp_id employees.employee_id%TYPE;
+  v_name employees.first_name%TYPE;
+  v_salary employees.salary%TYPE;
+BEGIN
+  OPEN emp_cursor;                    -- 1. Open the cursor
+  
+  LOOP
+    FETCH emp_cursor                  -- 2. Fetch one row
+    INTO v_emp_id, v_name, v_salary;
+    
+    EXIT WHEN emp_cursor%NOTFOUND;    -- 3. Exit when no more rows
+    
+    DBMS_OUTPUT.PUT_LINE(v_emp_id || ' - ' || v_name || ' - ' || v_salary);
+  END LOOP;
+  
+  CLOSE emp_cursor;                   -- 4. Close the cursor
+END;</pre>
+
+                <h4>Cursor FOR Loop (Easier)</h4>
+                <pre>DECLARE
+  CURSOR emp_cursor IS
+    SELECT employee_id, first_name, salary
+    FROM employees WHERE department_id = 50;
+BEGIN
+  FOR emp_rec IN emp_cursor LOOP
+    -- No OPEN, FETCH, CLOSE needed!
+    -- emp_rec is automatically created
+    DBMS_OUTPUT.PUT_LINE(emp_rec.employee_id || ' - ' || 
+                         emp_rec.first_name || ' - ' || 
+                         emp_rec.salary);
+  END LOOP;
+END;</pre>
+
+                <h4>Cursor with Parameter</h4>
+                <pre>DECLARE
+  CURSOR dept_cursor(p_dept_id NUMBER) IS
+    SELECT * FROM employees WHERE department_id = p_dept_id;
+BEGIN
+  FOR emp IN dept_cursor(50) LOOP
+    DBMS_OUTPUT.PUT_LINE(emp.first_name);
+  END LOOP;
+END;</pre>
+
+                <h3>4. SQL Cursor Attributes - DML Feedback</h3>
+                <div class="highlight-box">
+                    <p><strong>Purpose:</strong> Check results of INSERT, UPDATE, DELETE, SELECT INTO</p>
+                </div>
+
+                <table class="comparison-table">
+                    <tr>
+                        <th>Attribute</th>
+                        <th>Returns</th>
+                        <th>When to Use</th>
+                    </tr>
+                    <tr>
+                        <td>SQL%FOUND</td>
+                        <td>TRUE if ≥1 row affected</td>
+                        <td>Check if operation succeeded</td>
+                    </tr>
+                    <tr>
+                        <td>SQL%NOTFOUND</td>
+                        <td>TRUE if 0 rows affected</td>
+                        <td>Detect failed UPDATE/DELETE</td>
+                    </tr>
+                    <tr>
+                        <td>SQL%ROWCOUNT</td>
+                        <td>Number of rows affected</td>
+                        <td>Get exact count</td>
+                    </tr>
+                </table>
+
+                <h4>Example: UPDATE with Validation</h4>
+                <pre>DECLARE
+  v_dept_id NUMBER := 500;
+  e_invalid_dept EXCEPTION;
+BEGIN
+  UPDATE departments
+  SET department_name = 'Testing'
+  WHERE department_id = v_dept_id;
+  
+  IF SQL%NOTFOUND THEN               -- No rows updated
+    RAISE e_invalid_dept;
+  ELSE
+    DBMS_OUTPUT.PUT_LINE(SQL%ROWCOUNT || ' row(s) updated');
+    COMMIT;
+  END IF;
+EXCEPTION
+  WHEN e_invalid_dept THEN
+    DBMS_OUTPUT.PUT_LINE('Invalid department ID');
+END;</pre>
+
+                <h4>Example: DELETE with Count</h4>
+                <pre>BEGIN
+  DELETE FROM employees WHERE salary < 2000;
+  
+  DBMS_OUTPUT.PUT_LINE('Deleted ' || SQL%ROWCOUNT || ' employees');
+  
+  IF SQL%ROWCOUNT > 10 THEN
+    ROLLBACK;
+    DBMS_OUTPUT.PUT_LINE('Too many deletes - rolled back');
+  ELSE
+    COMMIT;
+  END IF;
+END;</pre>
+
+                <h3>5. PRAGMA EXCEPTION_INIT - Non-Predefined Exceptions</h3>
+                <div class="highlight-box">
+                    <p><strong>Purpose:</strong> Give a name to Oracle errors that don't have predefined names</p>
+                </div>
+
+                <h4>Standard Pattern</h4>
+                <pre>DECLARE
+  e_child_exists EXCEPTION;
+  PRAGMA EXCEPTION_INIT(e_child_exists, -2292);  -- Foreign key violation
+BEGIN
+  DELETE FROM departments WHERE department_id = 50;
+  COMMIT;
+EXCEPTION
+  WHEN e_child_exists THEN
+    DBMS_OUTPUT.PUT_LINE('Cannot delete - employees exist in this dept');
+END;</pre>
+
+                <h4>Common Oracle Error Codes</h4>
+                <table class="comparison-table">
+                    <tr>
+                        <th>Error Code</th>
+                        <th>Meaning</th>
+                        <th>Example Usage</th>
+                    </tr>
+                    <tr>
+                        <td>-1</td>
+                        <td>Unique constraint</td>
+                        <td>Duplicate primary key</td>
+                    </tr>
+                    <tr>
+                        <td>-1400</td>
+                        <td>NOT NULL violation</td>
+                        <td>Required column is NULL</td>
+                    </tr>
+                    <tr>
+                        <td>-2292</td>
+                        <td>Foreign key violation</td>
+                        <td>Child records exist</td>
+                    </tr>
+                </table>
+
+                <h4>Complete Example</h4>
+                <pre>DECLARE
+  e_null_not_allowed EXCEPTION;
+  PRAGMA EXCEPTION_INIT(e_null_not_allowed, -01400);
+BEGIN
+  INSERT INTO departments (department_id, department_name)
+  VALUES (280, NULL);
+EXCEPTION
+  WHEN e_null_not_allowed THEN
+    DBMS_OUTPUT.PUT_LINE('Department name cannot be NULL');
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Error: ' || SQLCODE || ' - ' || SQLERRM);
+END;</pre>
+
+                <h3>6. Substitution Variables - User Input</h3>
+                <div class="highlight-box">
+                    <p><strong>Purpose:</strong> Get input from user at runtime (SQL*Plus/SQL Developer)</p>
+                </div>
+
+                <h4>Basic Pattern</h4>
+                <pre>DECLARE
+  v_emp_id NUMBER := &employee_id;     -- User enters value
+  v_name VARCHAR2(50);
+BEGIN
+  SELECT first_name || ' ' || last_name INTO v_name
+  FROM employees WHERE employee_id = v_emp_id;
+  
+  DBMS_OUTPUT.PUT_LINE('Employee: ' || v_name);
+END;</pre>
+
+                <h4>With Default Prompt</h4>
+                <pre>ACCEPT emp_id NUMBER PROMPT 'Enter Employee ID: '
+
+DECLARE
+  v_name VARCHAR2(50);
+BEGIN
+  SELECT first_name INTO v_name
+  FROM employees WHERE employee_id = &emp_id;
+  
+  DBMS_OUTPUT.PUT_LINE(v_name);
+END;</pre>
+
+                <h3>7. DBMS_OUTPUT - Displaying Results</h3>
+                <div class="highlight-box">
+                    <p><strong>Purpose:</strong> Print messages to console (like System.out.println)</p>
+                </div>
+
+                <h4>Essential Commands</h4>
+                <pre>-- Enable output (run once per session)
+SET SERVEROUTPUT ON;
+
+-- Basic output
+DBMS_OUTPUT.PUT_LINE('Hello World');
+
+-- Variables
+DBMS_OUTPUT.PUT_LINE('Salary: ' || v_salary);
+
+-- Concatenation
+DBMS_OUTPUT.PUT_LINE(v_fname || ' ' || v_lname || ' earns ' || v_salary);</pre>
+
+                <h3>8. Complete Real-World Example</h3>
+                <p>This example combines ALL the patterns above:</p>
+
+                <pre>SET SERVEROUTPUT ON;
+
+-- Function using cursor and %TYPE
+CREATE OR REPLACE FUNCTION Get_Dept_Employee_Count(p_dept_id NUMBER)
+RETURN NUMBER
+IS
+  v_count NUMBER := 0;
+  CURSOR emp_cursor IS
+    SELECT employee_id FROM employees WHERE department_id = p_dept_id;
+BEGIN
+  FOR emp_rec IN emp_cursor LOOP
+    v_count := v_count + 1;
+  END LOOP;
+  RETURN v_count;
+END;
+/
+
+-- Procedure using all patterns
+CREATE OR REPLACE PROCEDURE Process_Department(p_dept_id IN NUMBER)
+IS
+  dept_rec departments%ROWTYPE;           -- %ROWTYPE
+  v_emp_count NUMBER;
+  e_invalid_dept EXCEPTION;
+  e_no_nulls EXCEPTION;
+  PRAGMA EXCEPTION_INIT(e_no_nulls, -1400);  -- Non-predefined exception
+BEGIN
+  -- SELECT INTO
+  SELECT * INTO dept_rec 
+  FROM departments WHERE department_id = p_dept_id;
+  
+  -- Call function
+  v_emp_count := Get_Dept_Employee_Count(p_dept_id);
+  
+  -- SQL Cursor Attributes
+  UPDATE departments 
+  SET department_name = UPPER(department_name)
+  WHERE department_id = p_dept_id;
+  
+  IF SQL%NOTFOUND THEN                    -- SQL%NOTFOUND
+    RAISE e_invalid_dept;
+  END IF;
+  
+  -- DBMS_OUTPUT
+  DBMS_OUTPUT.PUT_LINE('Department: ' || dept_rec.department_name);
+  DBMS_OUTPUT.PUT_LINE('Employees: ' || v_emp_count);
+  DBMS_OUTPUT.PUT_LINE('Rows updated: ' || SQL%ROWCOUNT);  -- SQL%ROWCOUNT
+  
+  COMMIT;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN                -- Predefined exception
+    DBMS_OUTPUT.PUT_LINE('Department ' || p_dept_id || ' not found');
+  WHEN e_invalid_dept THEN               -- User-defined exception
+    DBMS_OUTPUT.PUT_LINE('Invalid department ID');
+  WHEN e_no_nulls THEN                   -- Non-predefined exception
+    DBMS_OUTPUT.PUT_LINE('NULL values not allowed');
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Error: ' || SQLCODE || ' - ' || SQLERRM);
+    ROLLBACK;
+END;
+/
+
+-- Call with substitution variable
+BEGIN
+  Process_Department(&dept_id);
+END;
+/</pre>
+            </div>
+        </section>
+
+        <!-- QUIZ SECTION (Enhanced with more questions) -->
         <section id="quiz" class="section">
             <div class="card">
                 <h2>🎯 Practice Quiz</h2>
-                <p>Test your knowledge with mixed-difficulty questions. Select a unit to begin.</p>
+                <p>Test your knowledge with 120 questions covering all topics!</p>
                 
                 <div class="unit-selector" id="quizUnitSelector">
                     <div class="unit-card" onclick="startQuiz(10)">
                         <div class="unit-title">Unit 10</div>
-                        <div class="unit-desc">Functions</div>
+                        <div class="unit-desc">Functions (25 questions)</div>
                     </div>
                     <div class="unit-card" onclick="startQuiz(11)">
                         <div class="unit-title">Unit 11</div>
-                        <div class="unit-desc">Procedures</div>
+                        <div class="unit-desc">Procedures (25 questions)</div>
                     </div>
                     <div class="unit-card" onclick="startQuiz(12)">
                         <div class="unit-title">Unit 12</div>
-                        <div class="unit-desc">Exceptions</div>
+                        <div class="unit-desc">Exceptions (25 questions)</div>
                     </div>
                     <div class="unit-card" onclick="startQuiz(13)">
                         <div class="unit-title">Unit 13</div>
-                        <div class="unit-desc">Packages</div>
+                        <div class="unit-desc">Packages (25 questions)</div>
+                    </div>
+                    <div class="unit-card" onclick="startQuiz('patterns')">
+                        <div class="unit-title">Patterns</div>
+                        <div class="unit-desc">Coding Patterns (20 questions)</div>
                     </div>
                 </div>
                 
@@ -742,11 +1179,11 @@ package_name.variable_name := value;</pre>
             </div>
         </section>
 
-        <!-- FLASHCARDS SECTION -->
+        <!-- FLASHCARDS SECTION (Enhanced with more cards) -->
         <section id="flashcards" class="section">
             <div class="card">
                 <h2>🃏 Flashcards</h2>
-                <p>50 essential concepts to master. Click to flip.</p>
+                <p>75 essential concepts including all coding patterns. Click to flip.</p>
                 
                 <div class="flashcard" id="flashcardDisplay" onclick="flipCard()">
                     <div class="flashcard-label">Click to Flip</div>
@@ -769,33 +1206,49 @@ package_name.variable_name := value;</pre>
                 </div>
                 
                 <div style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
-                    Card <span id="cardNumber">1</span> of <span id="totalCards">50</span>
+                    Card <span id="cardNumber">1</span> of <span id="totalCards">75</span>
                 </div>
             </div>
         </section>
 
-        <!-- EXERCISES SECTION -->
+        <!-- EXERCISES SECTION (Enhanced) -->
         <section id="exercises" class="section">
             <div class="card">
                 <h2>💻 Coding Exercises</h2>
-                <p>Practice writing PL/SQL code with auto-checking.</p>
+                <p>Practice with 8 comprehensive exercises covering all patterns.</p>
                 
                 <div class="unit-selector">
                     <div class="unit-card" onclick="loadExercise(0)">
                         <div class="unit-title">Exercise 1</div>
-                        <div class="unit-desc">Create a Function</div>
+                        <div class="unit-desc">Function with Cursor</div>
                     </div>
                     <div class="unit-card" onclick="loadExercise(1)">
                         <div class="unit-title">Exercise 2</div>
-                        <div class="unit-desc">Create a Procedure</div>
+                        <div class="unit-desc">SELECT INTO Pattern</div>
                     </div>
                     <div class="unit-card" onclick="loadExercise(2)">
                         <div class="unit-title">Exercise 3</div>
-                        <div class="unit-desc">Exception Handling</div>
+                        <div class="unit-desc">%ROWTYPE Usage</div>
                     </div>
                     <div class="unit-card" onclick="loadExercise(3)">
                         <div class="unit-title">Exercise 4</div>
-                        <div class="unit-desc">Create a Package</div>
+                        <div class="unit-desc">SQL Cursor Attributes</div>
+                    </div>
+                    <div class="unit-card" onclick="loadExercise(4)">
+                        <div class="unit-title">Exercise 5</div>
+                        <div class="unit-desc">PRAGMA Exception</div>
+                    </div>
+                    <div class="unit-card" onclick="loadExercise(5)">
+                        <div class="unit-title">Exercise 6</div>
+                        <div class="unit-desc">Complete Procedure</div>
+                    </div>
+                    <div class="unit-card" onclick="loadExercise(6)">
+                        <div class="unit-title">Exercise 7</div>
+                        <div class="unit-desc">Package Creation</div>
+                    </div>
+                    <div class="unit-card" onclick="loadExercise(7)">
+                        <div class="unit-title">Exercise 8</div>
+                        <div class="unit-desc">Cursor FOR Loop</div>
                     </div>
                 </div>
                 
@@ -882,6 +1335,15 @@ package_name.variable_name := value;</pre>
                             <div class="progress-fill" id="unit13Bar" style="width: 0%"></div>
                         </div>
                     </div>
+                    <div style="margin: 1rem 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Coding Patterns</span>
+                            <span id="patternsProgress">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="patternsBar" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="controls" style="margin-top: 2rem;">
@@ -892,9 +1354,9 @@ package_name.variable_name := value;</pre>
     </div>
 
     <script>
-        // Data Storage
+        // Data Storage - Questions (expanded from 80 to 120)
         const questions = {
-            10: [ // Unit 10: Functions
+            10: [ // Unit 10: Functions (25 questions)
                 {
                     question: "What is the primary difference between a function and a procedure?",
                     options: [
@@ -1059,9 +1521,59 @@ package_name.variable_name := value;</pre>
                     ],
                     correct: 0,
                     difficulty: "medium"
+                },
+                {
+                    question: "What does this function do?\nFUNCTION get_sal(p_id NUMBER) RETURN NUMBER IS v_sal NUMBER; BEGIN SELECT salary INTO v_sal FROM employees WHERE employee_id = p_id; RETURN v_sal; END;",
+                    options: [
+                        "Returns salary for given employee ID",
+                        "Updates salary",
+                        "Calculates average salary",
+                        "Counts employees"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "If a function is called in a SELECT statement and raises an exception, what happens?",
+                    options: [
+                        "The entire query fails",
+                        "Only that row is skipped",
+                        "NULL is returned",
+                        "Default value is used"
+                    ],
+                    correct: 0,
+                    difficulty: "hard"
+                },
+                {
+                    question: "Which is the correct way to call a function that returns a value?",
+                    options: [
+                        "v_result := function_name(params);",
+                        "CALL function_name(params);",
+                        "EXEC function_name(params);",
+                        "function_name(params) INTO v_result;"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Can a function modify global package variables?",
+                    options: ["Yes", "No", "Only private variables", "Only public variables"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "What happens if you don't include RETURN in a function's executable section?",
+                    options: [
+                        "Compile-time error",
+                        "Runtime error",
+                        "Returns NULL",
+                        "Returns 0"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
                 }
             ],
-            11: [ // Unit 11: Procedures
+            11: [ // Unit 11: Procedures (25 questions)
                 {
                     question: "What is the main purpose of a procedure?",
                     options: [
@@ -1216,9 +1728,54 @@ package_name.variable_name := value;</pre>
                     ],
                     correct: 0,
                     difficulty: "easy"
+                },
+                {
+                    question: "What happens when you try to assign a value to an IN parameter?",
+                    options: [
+                        "Compile error",
+                        "Runtime error",
+                        "Value is ignored",
+                        "Works normally"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Which parameter mode would you use to update a value passed to the procedure?",
+                    options: ["IN OUT", "IN", "OUT", "INOUT"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Can a procedure have no parameters?",
+                    options: ["Yes", "No", "Only if it has RETURN", "Only in packages"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What is the difference between EXEC and CALL?",
+                    options: [
+                        "EXEC is SQL*Plus specific, CALL is standard SQL",
+                        "They are identical",
+                        "EXEC is faster",
+                        "CALL is for procedures, EXEC is for functions"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Can you pass a literal value to an OUT parameter?",
+                    options: [
+                        "No, must be a variable",
+                        "Yes, always",
+                        "Only numbers",
+                        "Only strings"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
                 }
             ],
-            12: [ // Unit 12: Exceptions
+            12: [ // Unit 12: Exceptions (25 questions)
                 {
                     question: "What is a PL/SQL exception?",
                     options: [
@@ -1383,9 +1940,49 @@ package_name.variable_name := value;</pre>
                     ],
                     correct: 0,
                     difficulty: "easy"
+                },
+                {
+                    question: "What is the syntax for PRAGMA EXCEPTION_INIT?",
+                    options: [
+                        "PRAGMA EXCEPTION_INIT(exception_name, error_code);",
+                        "PRAGMA INIT_EXCEPTION(error_code, exception_name);",
+                        "EXCEPTION_INIT(exception_name, error_code);",
+                        "INIT EXCEPTION(exception_name, error_code);"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "The error code for foreign key violation is:",
+                    options: ["-2292", "-1", "-1400", "-2291"],
+                    correct: 0,
+                    difficulty: "hard"
+                },
+                {
+                    question: "Can you re-raise an exception in an exception handler?",
+                    options: ["Yes, using RAISE;", "No", "Only with RAISE_APPLICATION_ERROR", "Only user-defined exceptions"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "What value does SQLCODE return when there is no error?",
+                    options: ["0", "1", "-1", "NULL"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "DUP_VAL_ON_INDEX exception occurs when:",
+                    options: [
+                        "Duplicate value inserted in unique column",
+                        "Index is missing",
+                        "Too many indexes",
+                        "Index is corrupted"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
                 }
             ],
-            13: [ // Unit 13: Packages
+            13: [ // Unit 13: Packages (25 questions)
                 {
                     question: "What are the two parts of a package?",
                     options: [
@@ -1570,12 +2167,250 @@ package_name.variable_name := value;</pre>
                     ],
                     correct: 0,
                     difficulty: "medium"
+                },
+                {
+                    question: "Can a package specification declare cursors?",
+                    options: ["Yes", "No", "Only in the body", "Only private cursors"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "What happens if you modify the package specification?",
+                    options: [
+                        "Body must be recompiled",
+                        "Nothing changes",
+                        "Package is dropped",
+                        "Only specification is recompiled"
+                    ],
+                    correct: 0,
+                    difficulty: "hard"
+                },
+                {
+                    question: "Can you have initialization code in a package body?",
+                    options: [
+                        "Yes, in a BEGIN..END block at the end",
+                        "No",
+                        "Only in specification",
+                        "Only for variables"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Package initialization code runs:",
+                    options: [
+                        "Once when first referenced in session",
+                        "Every time a procedure is called",
+                        "At database startup",
+                        "Never"
+                    ],
+                    correct: 0,
+                    difficulty: "hard"
+                },
+                {
+                    question: "Can different users see each other's package variable values?",
+                    options: [
+                        "No, each session has its own copy",
+                        "Yes, values are shared",
+                        "Only public variables are shared",
+                        "Only if explicitly shared"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                }
+            ],
+            patterns: [ // Coding Patterns (20 questions)
+                {
+                    question: "What happens if SELECT INTO returns no rows?",
+                    options: [
+                        "NO_DATA_FOUND exception",
+                        "Returns NULL",
+                        "Returns empty string",
+                        "Program continues"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What exception is raised if SELECT INTO returns multiple rows?",
+                    options: ["TOO_MANY_ROWS", "MULTIPLE_ROWS", "EXCESS_ROWS", "MANY_DATA_FOUND"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What does %TYPE do?",
+                    options: [
+                        "Matches variable datatype to table column",
+                        "Creates a new datatype",
+                        "Converts datatypes",
+                        "Validates datatypes"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What does %ROWTYPE create?",
+                    options: [
+                        "A record matching all columns in a table",
+                        "A single variable",
+                        "An array",
+                        "A cursor"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Which is correct: v_sal employees.salary%TYPE or v_sal %TYPE employees.salary?",
+                    options: [
+                        "v_sal employees.salary%TYPE",
+                        "v_sal %TYPE employees.salary",
+                        "Both are correct",
+                        "Neither is correct"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "What are the four steps of explicit cursor lifecycle?",
+                    options: [
+                        "OPEN, FETCH, EXIT WHEN, CLOSE",
+                        "DECLARE, OPEN, CLOSE, DROP",
+                        "CREATE, FETCH, CLOSE, DROP",
+                        "OPEN, READ, CLOSE, DELETE"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "In a cursor FOR loop, do you need to OPEN and CLOSE the cursor?",
+                    options: ["No, it's automatic", "Yes, always", "Only OPEN", "Only CLOSE"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What does SQL%NOTFOUND return after an UPDATE that affects 0 rows?",
+                    options: ["TRUE", "FALSE", "NULL", "0"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "What does SQL%ROWCOUNT return?",
+                    options: [
+                        "Number of rows affected by last DML",
+                        "Total rows in table",
+                        "TRUE or FALSE",
+                        "Current row number"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "SQL%FOUND returns TRUE when:",
+                    options: [
+                        "At least 1 row was affected",
+                        "No rows were affected",
+                        "Multiple rows were affected",
+                        "An error occurred"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What is PRAGMA EXCEPTION_INIT used for?",
+                    options: [
+                        "Associate error code with exception name",
+                        "Initialize exception variables",
+                        "Define new exceptions",
+                        "Handle multiple exceptions"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "The syntax is: PRAGMA EXCEPTION_INIT(exception_name, ___)",
+                    options: ["error_code", "error_message", "exception_type", "error_name"],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "What does the & symbol do in PL/SQL?",
+                    options: [
+                        "Creates substitution variable for user input",
+                        "Concatenates strings",
+                        "Bitwise AND operator",
+                        "Defines parameter"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What command must be run before DBMS_OUTPUT.PUT_LINE works?",
+                    options: ["SET SERVEROUTPUT ON", "ENABLE OUTPUT", "SHOW OUTPUT", "OUTPUT ON"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Which is better for processing multiple rows: SELECT INTO or Cursor?",
+                    options: [
+                        "Cursor",
+                        "SELECT INTO",
+                        "Both are equal",
+                        "Neither works"
+                    ],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "How do you access a field in a %ROWTYPE variable named emp_rec?",
+                    options: ["emp_rec.salary", "emp_rec[salary]", "emp_rec->salary", "emp_rec:salary"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "Can you use SELECT * INTO with a %ROWTYPE variable?",
+                    options: ["Yes", "No", "Only for single column", "Only with cursors"],
+                    correct: 0,
+                    difficulty: "easy"
+                },
+                {
+                    question: "What happens if you FETCH a cursor that has no more rows?",
+                    options: [
+                        "cursor_name%NOTFOUND becomes TRUE",
+                        "NO_DATA_FOUND exception",
+                        "Returns NULL",
+                        "Program crashes"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
+                },
+                {
+                    question: "Can SQL%ROWCOUNT be used with SELECT INTO?",
+                    options: [
+                        "Yes, but always returns 1 if successful",
+                        "No, only with DML",
+                        "Yes, returns number of columns",
+                        "No, causes error"
+                    ],
+                    correct: 0,
+                    difficulty: "hard"
+                },
+                {
+                    question: "Which pattern should you use when you need to update a row and check if it existed?",
+                    options: [
+                        "UPDATE then check SQL%NOTFOUND",
+                        "SELECT INTO then UPDATE",
+                        "Use cursor",
+                        "Use MERGE"
+                    ],
+                    correct: 0,
+                    difficulty: "medium"
                 }
             ]
         };
 
+        // Enhanced Flashcards (75 total)
         const flashcards = [
-            // Unit 10: Functions (12 cards)
+            // Original 50 flashcards
             { front: "What is a PL/SQL Function?", back: "A named PL/SQL block that RETURNS a value. Used for calculations, validations, and data transformations." },
             { front: "Function Parameter Mode", back: "Functions use only IN mode (read-only). Cannot use OUT or IN OUT parameters." },
             { front: "RETURN Statement", back: "Mandatory in functions. Returns a value to the calling program. Syntax: RETURN value;" },
@@ -1588,8 +2423,6 @@ package_name.variable_name := value;</pre>
             { front: "%TYPE in Functions", back: "Matches parameter datatype to table column. Example: emp_id employees.employee_id%TYPE" },
             { front: "Function Exception Handling", back: "Optional EXCEPTION section. Can RETURN value or NULL in exception handler." },
             { front: "Function Reusability", back: "Stored in schema, compiled once, can be called multiple times from SQL or PL/SQL" },
-            
-            // Unit 11: Procedures (12 cards)
             { front: "What is a PL/SQL Procedure?", back: "A named PL/SQL block that PERFORMS ACTIONS. Does not return value via RETURN (uses OUT parameters)." },
             { front: "IN Parameter Mode", back: "Passes value TO procedure (read-only). Can have default values. Default mode if not specified." },
             { front: "OUT Parameter Mode", back: "Returns value FROM procedure (write-only). Cannot have default values. Must be a variable." },
@@ -1602,8 +2435,6 @@ package_name.variable_name := value;</pre>
             { front: "Procedure vs Function", back: "Procedure: performs actions, uses OUT parameters\nFunction: returns value via RETURN, used in SQL" },
             { front: "When to use Procedures", back: "Data manipulation (INSERT/UPDATE/DELETE), complex business logic, multiple OUT values needed" },
             { front: "Procedure Header", back: "Name, Parameter list with modes (IN/OUT/IN OUT), IS/AS keyword. NO RETURN datatype." },
-            
-            // Unit 12: Exceptions (13 cards)
             { front: "What is a PL/SQL Exception?", back: "An error raised during program execution. Can be handled to prevent crashes." },
             { front: "Exception Types", back: "1. Predefined (NO_DATA_FOUND)\n2. Non-predefined (use PRAGMA)\n3. User-defined (custom)" },
             { front: "EXCEPTION Section", back: "Optional block starting with EXCEPTION keyword. Contains WHEN...THEN handlers." },
@@ -1617,8 +2448,6 @@ package_name.variable_name := value;</pre>
             { front: "Exception Propagation", back: "If not handled in current block, propagates to outer block or calling environment." },
             { front: "PRAGMA EXCEPTION_INIT", back: "Associates Oracle error code with user-defined exception name. For non-predefined exceptions." },
             { front: "Exception Best Practice", back: "Handle expected errors, use WHEN OTHERS for unexpected, log errors, don't suppress exceptions" },
-            
-            // Unit 13: Packages (13 cards)
             { front: "What is a PL/SQL Package?", back: "Schema object grouping related types, variables, cursors, exceptions, procedures, and functions." },
             { front: "Package Specification", back: "Interface/public API. Declares what's accessible outside package. Created FIRST." },
             { front: "Package Body", back: "Implementation. Contains code for spec items + private items. Created AFTER spec." },
@@ -1631,85 +2460,239 @@ package_name.variable_name := value;</pre>
             { front: "Drop Package", back: "DROP PACKAGE pkg_name; (drops spec+body)\nDROP PACKAGE BODY pkg_name; (body only)" },
             { front: "Bodiless Package", back: "Package with only specification. Used for constants and variables. No body needed." },
             { front: "Package State", back: "Variables persist for session duration. Shared across all calls in same session." },
-            { front: "Package Initialization", back: "Optional BEGIN..END in body. Runs once when package first loaded. Initializes variables." }
+            { front: "Package Initialization", back: "Optional BEGIN..END in body. Runs once when package first loaded. Initializes variables." },
+            
+            // New 25 flashcards for coding patterns
+            { front: "SELECT INTO Purpose", back: "Retrieve data from database into PL/SQL variables. Must return EXACTLY one row." },
+            { front: "SELECT INTO Exceptions", back: "0 rows → NO_DATA_FOUND\n2+ rows → TOO_MANY_ROWS\nAlways handle these!" },
+            { front: "SELECT INTO Syntax", back: "SELECT col1, col2 INTO v_var1, v_var2\nFROM table WHERE condition;" },
+            { front: "%TYPE Definition", back: "Anchors a variable's datatype to a table column.\nSyntax: v_sal employees.salary%TYPE" },
+            { front: "%ROWTYPE Definition", back: "Creates a record structure matching all columns in a table.\nSyntax: emp_rec employees%ROWTYPE" },
+            { front: "%TYPE vs %ROWTYPE", back: "%TYPE = single column datatype\n%ROWTYPE = complete row structure\nBoth ensure datatype consistency" },
+            { front: "Accessing %ROWTYPE fields", back: "record_name.column_name\nExample: emp_rec.salary := 5000;" },
+            { front: "Explicit Cursor Lifecycle", back: "1. OPEN cursor\n2. FETCH into variables\n3. EXIT WHEN cursor%NOTFOUND\n4. CLOSE cursor" },
+            { front: "Cursor FOR Loop", back: "FOR rec IN cursor_name LOOP\n  -- rec is auto-created\n  -- No OPEN, FETCH, CLOSE needed\nEND LOOP;" },
+            { front: "When to use Cursors", back: "When processing multiple rows. SELECT INTO would raise TOO_MANY_ROWS for 2+ rows." },
+            { front: "Cursor with Parameter", back: "CURSOR c(p_id NUMBER) IS SELECT...\nFOR rec IN c(100) LOOP...END LOOP;" },
+            { front: "SQL%FOUND", back: "Returns TRUE if ≥1 row was affected by last DML statement (INSERT/UPDATE/DELETE/SELECT INTO)" },
+            { front: "SQL%NOTFOUND", back: "Returns TRUE if 0 rows were affected. Used to detect failed UPDATE/DELETE operations." },
+            { front: "SQL%ROWCOUNT", back: "Returns number of rows affected by last DML. Example: DBMS_OUTPUT.PUT_LINE(SQL%ROWCOUNT);" },
+            { front: "SQL Cursor Attributes Use", back: "Check DML success: IF SQL%NOTFOUND THEN RAISE exception;\nGet count: v_count := SQL%ROWCOUNT;" },
+            { front: "PRAGMA EXCEPTION_INIT Purpose", back: "Associates an Oracle error code with a user-defined exception name for non-predefined errors." },
+            { front: "PRAGMA EXCEPTION_INIT Syntax", back: "DECLARE\n  e_name EXCEPTION;\n  PRAGMA EXCEPTION_INIT(e_name, -error_code);" },
+            { front: "Common Error Codes", back: "-1: Unique constraint\n-1400: NOT NULL\n-2292: Foreign key violation" },
+            { front: "Substitution Variable", back: "User input at runtime using &variable_name. Example: v_id := &employee_id;" },
+            { front: "DBMS_OUTPUT.PUT_LINE", back: "Prints output to console. Requires: SET SERVEROUTPUT ON;\nSyntax: DBMS_OUTPUT.PUT_LINE('text');" },
+            { front: "String Concatenation", back: "Use || operator: DBMS_OUTPUT.PUT_LINE('Name: ' || v_name || ' Salary: ' || v_sal);" },
+            { front: "cursor_name%NOTFOUND", back: "Cursor attribute. TRUE when FETCH finds no more rows. Used in EXIT WHEN condition." },
+            { front: "cursor_name%FOUND", back: "Cursor attribute. TRUE when FETCH successfully retrieves a row." },
+            { front: "cursor_name%ROWCOUNT", back: "Cursor attribute. Returns number of rows fetched so far from cursor." },
+            { front: "Best Practice Pattern", back: "1. Declare with %TYPE/%ROWTYPE\n2. SELECT INTO or Cursor\n3. Handle NO_DATA_FOUND\n4. Check SQL%NOTFOUND" }
         ];
 
+        // Enhanced Exercises (8 total)
         const exercises = [
             {
-                title: "Create a Temperature Conversion Function",
-                description: "Write a function named CELSIUS_TO_FAHRENHEIT that accepts temperature in Celsius and returns temperature in Fahrenheit. Formula: F = (C * 9/5) + 32",
-                keywords: ["FUNCTION", "CELSIUS_TO_FAHRENHEIT", "RETURN", "9", "5", "32"],
-                hint: "Start with CREATE OR REPLACE FUNCTION. Parameter should be IN mode. Use the formula F = (C * 9/5) + 32 in the RETURN statement.",
-                solution: `CREATE OR REPLACE FUNCTION Celsius_To_Fahrenheit(temp_c IN NUMBER)
-RETURN NUMBER
+                title: "Function with Explicit Cursor",
+                description: "Create a function GET_DEPT_NAME that accepts a location_id and returns the country name. Use an EXPLICIT cursor (OPEN, FETCH, CLOSE).",
+                keywords: ["FUNCTION", "GET_DEPT_NAME", "CURSOR", "OPEN", "FETCH", "CLOSE", "RETURN"],
+                hint: "Declare a cursor that joins locations and countries tables. Use OPEN cursor, FETCH into variable, CLOSE cursor, then RETURN the variable.",
+                solution: `CREATE OR REPLACE FUNCTION Get_Dept_Name(loc_id NUMBER)
+RETURN VARCHAR2
 IS
+  CURSOR country_cursor IS
+    SELECT country_name 
+    FROM locations l, countries c
+    WHERE l.country_id = c.country_id 
+    AND l.location_id = loc_id;
+  
+  v_country_name VARCHAR2(50);
 BEGIN
-  RETURN (temp_c * 9/5) + 32;
-END Celsius_To_Fahrenheit;`
+  OPEN country_cursor;
+  FETCH country_cursor INTO v_country_name;
+  CLOSE country_cursor;
+  RETURN v_country_name;
+END;`
             },
             {
-                title: "Create a Procedure with OUT Parameter",
-                description: "Write a procedure named GET_EMP_DETAILS that accepts employee_id (IN) and returns employee name and salary (OUT parameters). Use a SELECT INTO statement.",
+                title: "Procedure with SELECT INTO",
+                description: "Create a procedure GET_EMP_DETAILS with parameters: emp_id IN, emp_name OUT, emp_salary OUT. Use SELECT INTO to retrieve data.",
                 keywords: ["PROCEDURE", "GET_EMP_DETAILS", "IN", "OUT", "SELECT", "INTO"],
-                hint: "Use three parameters: emp_id IN NUMBER, emp_name OUT VARCHAR2, emp_sal OUT NUMBER. Use SELECT first_name, salary INTO... FROM employees WHERE employee_id = emp_id;",
+                hint: "Use SELECT first_name, salary INTO out_param1, out_param2 FROM employees WHERE employee_id = in_param. Include exception handling for NO_DATA_FOUND.",
                 solution: `CREATE OR REPLACE PROCEDURE Get_Emp_Details
   (emp_id IN NUMBER,
    emp_name OUT VARCHAR2,
-   emp_sal OUT NUMBER)
+   emp_salary OUT NUMBER)
 IS
 BEGIN
   SELECT first_name, salary
-  INTO emp_name, emp_sal
+  INTO emp_name, emp_salary
   FROM employees
   WHERE employee_id = emp_id;
-END Get_Emp_Details;`
-            },
-            {
-                title: "Add Exception Handling",
-                description: "Write a function GET_DEPT_NAME that accepts department_id and returns department_name. Handle NO_DATA_FOUND exception and return 'Unknown Department' if not found.",
-                keywords: ["FUNCTION", "EXCEPTION", "NO_DATA_FOUND", "WHEN", "RETURN"],
-                hint: "Use SELECT department_name INTO in the BEGIN section. Add EXCEPTION section with WHEN NO_DATA_FOUND THEN RETURN 'Unknown Department';",
-                solution: `CREATE OR REPLACE FUNCTION Get_Dept_Name(dept_id IN NUMBER)
-RETURN VARCHAR2
-IS
-  dept_name VARCHAR2(50);
-BEGIN
-  SELECT department_name INTO dept_name
-  FROM departments
-  WHERE department_id = dept_id;
-  RETURN dept_name;
 EXCEPTION
   WHEN NO_DATA_FOUND THEN
-    RETURN 'Unknown Department';
-  WHEN OTHERS THEN
-    RETURN 'Error: ' || SQLERRM;
-END Get_Dept_Name;`
+    emp_name := 'Not Found';
+    emp_salary := 0;
+END;`
             },
             {
-                title: "Create a Simple Package",
-                description: "Create a package MATH_PKG with: 1) Public function ADD_NUMS(a,b) that returns a+b, 2) Public function MULTIPLY_NUMS(a,b) that returns a*b. Create both specification and body.",
-                keywords: ["PACKAGE", "MATH_PKG", "FUNCTION", "ADD_NUMS", "MULTIPLY_NUMS", "PACKAGE BODY"],
-                hint: "First create the spec with FUNCTION declarations. Then create the body with FUNCTION implementations. Both functions should accept two NUMBER parameters and RETURN NUMBER.",
+                title: "Using %ROWTYPE",
+                description: "Create a procedure DISPLAY_DEPT that accepts dept_id and uses %ROWTYPE to fetch and display all department information.",
+                keywords: ["PROCEDURE", "%ROWTYPE", "SELECT", "INTO", "DBMS_OUTPUT"],
+                hint: "Declare: dept_rec departments%ROWTYPE; Then: SELECT * INTO dept_rec FROM departments WHERE... Access fields: dept_rec.department_name",
+                solution: `CREATE OR REPLACE PROCEDURE Display_Dept(p_dept_id NUMBER)
+IS
+  dept_rec departments%ROWTYPE;
+BEGIN
+  SELECT * INTO dept_rec
+  FROM departments
+  WHERE department_id = p_dept_id;
+  
+  DBMS_OUTPUT.PUT_LINE('Department: ' || dept_rec.department_name);
+  DBMS_OUTPUT.PUT_LINE('Manager ID: ' || dept_rec.manager_id);
+  DBMS_OUTPUT.PUT_LINE('Location ID: ' || dept_rec.location_id);
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('Department not found');
+END;`
+            },
+            {
+                title: "SQL Cursor Attributes Practice",
+                description: "Create a procedure UPDATE_SALARY that updates salary for a department. Use SQL%NOTFOUND to check if update succeeded and SQL%ROWCOUNT to display number of rows updated.",
+                keywords: ["PROCEDURE", "UPDATE", "SQL%NOTFOUND", "SQL%ROWCOUNT", "IF"],
+                hint: "After UPDATE statement, check: IF SQL%NOTFOUND THEN raise exception ELSE display SQL%ROWCOUNT. Don't forget COMMIT.",
+                solution: `CREATE OR REPLACE PROCEDURE Update_Salary
+  (p_dept_id NUMBER, p_increase_pct NUMBER)
+IS
+  e_no_dept EXCEPTION;
+BEGIN
+  UPDATE employees
+  SET salary = salary * (1 + p_increase_pct/100)
+  WHERE department_id = p_dept_id;
+  
+  IF SQL%NOTFOUND THEN
+    RAISE e_no_dept;
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('Updated ' || SQL%ROWCOUNT || ' employees');
+    COMMIT;
+  END IF;
+EXCEPTION
+  WHEN e_no_dept THEN
+    DBMS_OUTPUT.PUT_LINE('No employees in this department');
+END;`
+            },
+            {
+                title: "PRAGMA EXCEPTION_INIT",
+                description: "Create a procedure DELETE_DEPT that deletes a department. Handle foreign key violation (-2292) using PRAGMA EXCEPTION_INIT.",
+                keywords: ["PROCEDURE", "DELETE", "EXCEPTION", "PRAGMA", "EXCEPTION_INIT", "-2292"],
+                hint: "Declare: e_child_exists EXCEPTION; PRAGMA EXCEPTION_INIT(e_child_exists, -2292); Then handle in EXCEPTION section.",
+                solution: `CREATE OR REPLACE PROCEDURE Delete_Dept(p_dept_id NUMBER)
+IS
+  e_child_exists EXCEPTION;
+  PRAGMA EXCEPTION_INIT(e_child_exists, -2292);
+BEGIN
+  DELETE FROM departments WHERE department_id = p_dept_id;
+  
+  IF SQL%ROWCOUNT > 0 THEN
+    DBMS_OUTPUT.PUT_LINE('Department deleted');
+    COMMIT;
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('Department not found');
+  END IF;
+EXCEPTION
+  WHEN e_child_exists THEN
+    DBMS_OUTPUT.PUT_LINE('Cannot delete - employees exist in this dept');
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Error: ' || SQLCODE || ' - ' || SQLERRM);
+END;`
+            },
+            {
+                title: "Complete Procedure with All Patterns",
+                description: "Create PROCESS_EMPLOYEE procedure with emp_id IN parameter. Use %TYPE for variables, SELECT INTO to get employee data, SQL%NOTFOUND to check if found, and handle exceptions.",
+                keywords: ["PROCEDURE", "%TYPE", "SELECT", "INTO", "SQL%NOTFOUND", "EXCEPTION", "NO_DATA_FOUND"],
+                hint: "Combine: v_name employees.first_name%TYPE, SELECT INTO, IF SQL%NOTFOUND, exception handler for NO_DATA_FOUND and WHEN OTHERS.",
+                solution: `CREATE OR REPLACE PROCEDURE Process_Employee(p_emp_id NUMBER)
+IS
+  v_fname employees.first_name%TYPE;
+  v_lname employees.last_name%TYPE;
+  v_salary employees.salary%TYPE;
+BEGIN
+  SELECT first_name, last_name, salary
+  INTO v_fname, v_lname, v_salary
+  FROM employees
+  WHERE employee_id = p_emp_id;
+  
+  DBMS_OUTPUT.PUT_LINE('Employee: ' || v_fname || ' ' || v_lname);
+  DBMS_OUTPUT.PUT_LINE('Salary: ' || v_salary);
+  
+  IF v_salary < 3000 THEN
+    DBMS_OUTPUT.PUT_LINE('Low salary - needs review');
+  END IF;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('Employee ' || p_emp_id || ' not found');
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Error: ' || SQLCODE || ' - ' || SQLERRM);
+END;`
+            },
+            {
+                title: "Package with Public and Private",
+                description: "Create package EMP_PKG with: public function GET_COUNT(dept_id) returning employee count, and public procedure DISPLAY_INFO(emp_id). Include a private variable for tracking.",
+                keywords: ["PACKAGE", "EMP_PKG", "FUNCTION", "PROCEDURE", "PACKAGE BODY", "IS", "END"],
+                hint: "Specification declares public items. Body implements them and can have private variables. Don't forget / after each CREATE statement.",
                 solution: `-- Package Specification
-CREATE OR REPLACE PACKAGE Math_Pkg IS
-  FUNCTION Add_Nums(a NUMBER, b NUMBER) RETURN NUMBER;
-  FUNCTION Multiply_Nums(a NUMBER, b NUMBER) RETURN NUMBER;
-END Math_Pkg;
+CREATE OR REPLACE PACKAGE Emp_Pkg IS
+  FUNCTION Get_Count(p_dept_id NUMBER) RETURN NUMBER;
+  PROCEDURE Display_Info(p_emp_id NUMBER);
+END Emp_Pkg;
 /
 
 -- Package Body
-CREATE OR REPLACE PACKAGE BODY Math_Pkg IS
-  FUNCTION Add_Nums(a NUMBER, b NUMBER) RETURN NUMBER IS
-  BEGIN
-    RETURN a + b;
-  END Add_Nums;
+CREATE OR REPLACE PACKAGE BODY Emp_Pkg IS
+  v_call_count NUMBER := 0;  -- Private variable
   
-  FUNCTION Multiply_Nums(a NUMBER, b NUMBER) RETURN NUMBER IS
+  FUNCTION Get_Count(p_dept_id NUMBER) RETURN NUMBER IS
+    v_count NUMBER;
   BEGIN
-    RETURN a * b;
-  END Multiply_Nums;
-END Math_Pkg;
+    SELECT COUNT(*) INTO v_count
+    FROM employees WHERE department_id = p_dept_id;
+    RETURN v_count;
+  END Get_Count;
+  
+  PROCEDURE Display_Info(p_emp_id NUMBER) IS
+    v_name VARCHAR2(50);
+  BEGIN
+    v_call_count := v_call_count + 1;
+    SELECT first_name || ' ' || last_name INTO v_name
+    FROM employees WHERE employee_id = p_emp_id;
+    DBMS_OUTPUT.PUT_LINE(v_name || ' (Call #' || v_call_count || ')');
+  END Display_Info;
+END Emp_Pkg;
 /`
+            },
+            {
+                title: "Cursor FOR Loop Pattern",
+                description: "Create a procedure LIST_HIGH_SALARIES that uses a cursor FOR loop to display all employees with salary > 10000. No need for OPEN, FETCH, CLOSE.",
+                keywords: ["PROCEDURE", "CURSOR", "FOR", "LOOP", "DBMS_OUTPUT"],
+                hint: "Declare cursor with SELECT. Use: FOR emp_rec IN cursor_name LOOP ... END LOOP; Access: emp_rec.column_name",
+                solution: `CREATE OR REPLACE PROCEDURE List_High_Salaries
+IS
+  CURSOR high_sal_cursor IS
+    SELECT employee_id, first_name, last_name, salary
+    FROM employees
+    WHERE salary > 10000
+    ORDER BY salary DESC;
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('High Salary Employees:');
+  DBMS_OUTPUT.PUT_LINE('======================');
+  
+  FOR emp_rec IN high_sal_cursor LOOP
+    DBMS_OUTPUT.PUT_LINE(emp_rec.employee_id || ' - ' ||
+                         emp_rec.first_name || ' ' ||
+                         emp_rec.last_name || ': $' ||
+                         emp_rec.salary);
+  END LOOP;
+END;`
             }
         ];
 
@@ -1724,12 +2707,12 @@ END Math_Pkg;
             totalScore: 0,
             cardsReviewed: new Set(),
             exercisesCompleted: new Set(),
-            unitScores: { 10: [], 11: [], 12: [], 13: [] }
+            unitScores: { 10: [], 11: [], 12: [], 13: [], patterns: [] }
         };
 
         // Load progress from session storage
         function loadProgress() {
-            const saved = sessionStorage.getItem('plsql_progress');
+            const saved = sessionStorage.getItem('plsql_progress_complete');
             if (saved) {
                 const data = JSON.parse(saved);
                 progressData = {
@@ -1748,7 +2731,7 @@ END Math_Pkg;
                 cardsReviewed: Array.from(progressData.cardsReviewed),
                 exercisesCompleted: Array.from(progressData.exercisesCompleted)
             };
-            sessionStorage.setItem('plsql_progress', JSON.stringify(toSave));
+            sessionStorage.setItem('plsql_progress_complete', JSON.stringify(toSave));
             updateProgressDisplay();
         }
 
@@ -1974,7 +2957,7 @@ END Math_Pkg;
             document.getElementById('exercisesCompleted').textContent = progressData.exercisesCompleted.size;
             
             // Unit progress
-            [10, 11, 12, 13].forEach(unit => {
+            [10, 11, 12, 13, 'patterns'].forEach(unit => {
                 const scores = progressData.unitScores[unit];
                 const avg = scores.length > 0 ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length) : 0;
                 document.getElementById(`unit${unit}Progress`).textContent = avg + '%';
@@ -1984,13 +2967,13 @@ END Math_Pkg;
 
         function resetProgress() {
             if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
-                sessionStorage.removeItem('plsql_progress');
+                sessionStorage.removeItem('plsql_progress_complete');
                 progressData = {
                     quizzesTaken: 0,
                     totalScore: 0,
                     cardsReviewed: new Set(),
                     exercisesCompleted: new Set(),
-                    unitScores: { 10: [], 11: [], 12: [], 13: [] }
+                    unitScores: { 10: [], 11: [], 12: [], 13: [], patterns: [] }
                 };
                 updateProgressDisplay();
             }
